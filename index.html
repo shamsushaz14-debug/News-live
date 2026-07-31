@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
+    <!-- ആപ്പിന്റെ പേര് -->
     <title>News TV</title>
     
     <meta name="theme-color" content="#121212">
@@ -94,7 +95,7 @@
             background: #000;
         }
 
-        .video-wrapper iframe, .video-wrapper div#yt-player {
+        .video-wrapper iframe {
             position: absolute;
             top: 0;
             left: 0;
@@ -288,7 +289,7 @@
 
     <header>
         <h1>News TV</h1>
-        <p>Developed by Shamsu Shaz</p>
+        <p>Developed by Shamsu Shaz © 2026</p>
         <button id="install-app-btn" onclick="installApp()" style="display:none; margin-top:8px; background-color:#ff4757; color:#fff; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; font-size:0.8rem; cursor:pointer;">⬇ Install App</button>
     </header>
 
@@ -297,7 +298,7 @@
         <!-- Player Box -->
         <div class="player-container" id="player-box">
             <div class="video-wrapper fit-169" id="video-wrapper">
-                <div id="yt-player"></div>
+                <iframe id="tv-player" src="" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
             </div>
 
             <div class="overlay-controls">
@@ -323,60 +324,62 @@
     </div>
 
     <footer>
-        <p>© 2026 News TV Grid</p>
+        <p>Developed by Shamsu Shaz © 2026</p>
     </footer>
 
-    <!-- YouTube IFrame Player API Script -->
-    <script src="https://www.youtube.com/iframe_api"></script>
-
     <script>
-        // ഇവിടെ മാനുവൽ videoId നൽകേണ്ടതില്ല. ഓട്ടോമാറ്റിക് ചാനൽ ഐഡി മാത്രം നൽകിയാൽ മതി!
         const channels = [
-            { name: "24 News", channelId: "UCup3etEdjyF1L3sRbU-rKLw", logo: "24.png" },
-            { name: "Asianet News", channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw", logo: "asianet.png" },
-            { name: "Manorama News", channelId: "UCP0uG-mcMImgKnJz-VjJZmQ", logo: "manorama.png" },
-            { name: "Mathrubhumi News", channelId: "UCwXrBBZnIh2ER4lal6WbAHw", logo: "mathrubhumi.png" },
-            { name: "MediaOne", channelId: "UC-f7r46JhYv78q5pGrO6ivA", logo: "mediaone.png" },
-            { name: "Reporter TV", channelId: "UCFx1nseXKTc1Culiu3neeSQ", logo: "reporter.png" },
-            { name: "News18 Kerala", channelId: "UC-mMi78WJST4N5o8_i1FoXw", logo: "news18.png" },
-            { name: "BIG TV", channelId: "UClFe5TPbW1MVrOPpbNHTDoQ", logo: "bigtv.png" },
-            { name: "News Malayalam", channelId: "UCXp6JTdq7-WwBK09S7SzmxQ", logo: "newsmalayalam.png" }
+            { 
+                name: "24 News", 
+                channelId: "UCup3etEdjyF1L3sRbU-rKLw",
+                logo: "24.png"
+            },
+            { 
+                name: "Asianet News", 
+                channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw",
+                logo: "asianet.png"
+            },
+            { 
+                name: "Manorama News", 
+                channelId: "UCP0uG-mcMImgKnJz-VjJZmQ",
+                logo: "manorama.png"
+            },
+            { 
+                name: "Mathrubhumi News", 
+                channelId: "UCwXrBBZnIh2ER4lal6WbAHw",
+                logo: "mathrubhumi.png"
+            },
+            { 
+                name: "MediaOne", 
+                channelId: "UC-f7r46JhYv78q5pGrO6ivA",
+                logo: "mediaone.png"
+            },
+            { 
+                name: "Reporter TV", 
+                channelId: "UCFx1nseXKTc1Culiu3neeSQ",
+                logo: "reporter.png"
+            },
+            { 
+                name: "News18 Kerala", 
+                channelId: "UC-mMi78WJST4N5o8_i1FoXw", 
+                isAutoLive: true,
+                logo: "news18.png"
+            },
+            { 
+                name: "BIG TV", 
+                channelId: "UClFe5TPbW1MVrOPpbNHTDoQ", 
+                isAutoLive: true,
+                logo: "bigtv.png"
+            },
+            { 
+                name: "News Malayalam", 
+                channelId: "UCXp6JTdq7-WwBK09S7SzmxQ",
+                logo: "newsmalayalam.png"
+            }
         ];
 
         let currentIndex = -1;
         let mainExitClickedOnce = false;
-        let ytPlayer = null;
-        let isMuted = false;
-
-        // YouTube IFrame API സജ്ജമാക്കുന്നു
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('yt-player', {
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 1,
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'playsinline': 1
-                },
-                events: {
-                    'onError': onErrorHandle
-                }
-            });
-        }
-
-        // വീഡിയോ ഐഡി തെറ്റുകയോ ലൈവ് മാറുകയോ ചെയ്താൽ ഓട്ടോമാറ്റിക് അടുത്ത ലൈവിലേക്ക് റീഡയറക്ട് ചെയ്യുന്ന ലോജിക്
-        function onErrorHandle(event) {
-            console.log("Stream Error Encountered. Auto Switching Live Stream...");
-            if (currentIndex !== -1) {
-                const channel = channels[currentIndex];
-                ytPlayer.loadPlaylist({
-                    listType: 'playlist',
-                    list: 'UU' + channel.channelId.substring(2)
-                });
-            }
-        }
 
         function buildGrid() {
             const grid = document.getElementById('grid-container');
@@ -393,27 +396,66 @@
             });
         }
 
-        function playChannel(index) {
+        // Auto-fetch വഴി ഏറ്റവും പുതിയ Video ID കണ്ടെത്തുന്നു
+        async function getLatestVideoId(channelId) {
+            try {
+                const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+                const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    const latestVideoLink = data.items[0].link;
+                    const videoId = latestVideoLink.split('v=')[1];
+                    return videoId;
+                }
+            } catch (error) {
+                console.error("Auto-fetch error:", error);
+            }
+            return null;
+        }
+
+        async function playChannel(index) {
             currentIndex = index;
             mainExitClickedOnce = false;
             isMuted = false;
             const muteBtn = document.getElementById('mute-toggle-btn');
             if (muteBtn) muteBtn.textContent = '🔊';
-
             const channel = channels[currentIndex];
             const playerBox = document.getElementById('player-box');
+            const player = document.getElementById('tv-player');
 
-            playerBox.style.display = "block";
+            let src = "";
 
-            if (ytPlayer && ytPlayer.loadPlaylist) {
-                // ചാനലിന്റെ അപ്‌ലോഡ് ലൈവ് ലിസ്റ്റ് നേരിട്ട് പ്ലെയറിലേക്ക് ഫീഡ് ചെയ്യുന്നു (ഓട്ടോ അപ്‌ഡേറ്റ് ആയിക്കൊള്ളും)
-                ytPlayer.loadPlaylist({
-                    listType: 'playlist',
-                    list: 'UU' + channel.channelId.substring(2)
-                });
+            if (channel.isAutoLive) {
+                const fetchedVideoId = await getLatestVideoId(channel.channelId);
+                if (fetchedVideoId) {
+                    src = `https://www.youtube.com/embed/${fetchedVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
+                } else {
+                    src = `https://www.youtube.com/embed/live_stream?channel=${channel.channelId}&autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
+                }
+            } else if (channel.videoId) {
+                src = `https://www.youtube.com/embed/${channel.videoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
+            } else {
+                src = `https://www.youtube.com/embed/live_stream?channel=${channel.channelId}&autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
             }
 
+            player.src = src;
+            playerBox.style.display = "block";
+
             playerBox.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => requestHighestQuality(), 2500);
+        }
+
+        function requestHighestQuality() {
+            const player = document.getElementById('tv-player');
+            if (!player || !player.contentWindow) return;
+            player.contentWindow.postMessage(JSON.stringify({
+                event: 'command',
+                func: 'setPlaybackQuality',
+                args: ['hd1080']
+            }), '*');
         }
 
         function changeChannel(direction) {
@@ -430,11 +472,10 @@
 
         function stopAndExitPlayer() {
             const playerBox = document.getElementById('player-box');
+            const player = document.getElementById('tv-player');
 
             if (!mainExitClickedOnce && playerBox.style.display === "block") {
-                if (ytPlayer && ytPlayer.stopVideo) {
-                    ytPlayer.stopVideo();
-                }
+                player.src = "";
                 playerBox.style.display = "none";
                 currentIndex = -1;
                 mainExitClickedOnce = true;
@@ -465,9 +506,13 @@
 
             try {
                 const target = document.documentElement;
-                if (target.requestFullscreen) target.requestFullscreen();
-                else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
-                else if (target.msRequestFullscreen) target.msRequestFullscreen();
+                const enterFS = target.requestFullscreen
+                    ? target.requestFullscreen()
+                    : target.webkitRequestFullscreen
+                        ? target.webkitRequestFullscreen()
+                        : target.msRequestFullscreen
+                            ? target.msRequestFullscreen()
+                            : null;
             } catch (e) {}
         }
 
@@ -482,9 +527,13 @@
             updateStretchButtonLabel();
 
             if (document.fullscreenElement || document.webkitFullscreenElement) {
-                if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-                else if (document.msExitFullscreen) document.msExitFullscreen();
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().catch(() => {});
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
             }
         }
 
@@ -539,19 +588,17 @@
             }
         }
 
-        function toggleMute() {
-            const btn = document.getElementById('mute-toggle-btn');
-            if (!ytPlayer) return;
+        let isMuted = false;
 
-            if (ytPlayer.isMuted()) {
-                ytPlayer.unMute();
-                isMuted = false;
-                if (btn) btn.textContent = '🔊';
-            } else {
-                ytPlayer.mute();
-                isMuted = true;
-                if (btn) btn.textContent = '🔇';
-            }
+        function toggleMute() {
+            const player = document.getElementById('tv-player');
+            const btn = document.getElementById('mute-toggle-btn');
+            if (!player || !player.contentWindow) return;
+
+            const func = isMuted ? 'unMute' : 'mute';
+            player.contentWindow.postMessage(JSON.stringify({ event: 'command', func: func, args: [] }), '*');
+            isMuted = !isMuted;
+            if (btn) btn.textContent = isMuted ? '🔇' : '🔊';
         }
 
         function handleFullscreenChange() {
@@ -597,5 +644,4 @@
         window.onload = buildGrid;
     </script>
 </body>
-</html>
-
+    </html>
