@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- ആപ്പിന്റെ പേര് -->
     <title>News TV</title>
     
     <meta name="theme-color" content="#121212">
@@ -95,7 +94,7 @@
             background: #000;
         }
 
-        .video-wrapper iframe {
+        .video-wrapper iframe, .video-wrapper div#yt-player {
             position: absolute;
             top: 0;
             left: 0;
@@ -289,8 +288,7 @@
 
     <header>
         <h1>News TV</h1>
-        <p>Developed by Shamsu Shaz © 2026</p>
-
+        <p>Developed by Shamsu Shaz</p>
         <button id="install-app-btn" onclick="installApp()" style="display:none; margin-top:8px; background-color:#ff4757; color:#fff; border:none; padding:8px 16px; border-radius:20px; font-weight:bold; font-size:0.8rem; cursor:pointer;">⬇ Install App</button>
     </header>
 
@@ -299,7 +297,7 @@
         <!-- Player Box -->
         <div class="player-container" id="player-box">
             <div class="video-wrapper fit-169" id="video-wrapper">
-                <iframe id="tv-player" src="" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+                <div id="yt-player"></div>
             </div>
 
             <div class="overlay-controls">
@@ -328,59 +326,57 @@
         <p>© 2026 News TV Grid</p>
     </footer>
 
+    <!-- YouTube IFrame Player API Script -->
+    <script src="https://www.youtube.com/iframe_api"></script>
+
     <script>
-                const channels = [
-            { 
-                name: "24 News", 
-                channelId: "UCup3etEdjyF1L3sRbU-rKLw",
-                logo: "24.png"
-            },
-            { 
-                name: "Asianet News", 
-                channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw",
-                logo: "asianet.png"
-            },
-            { 
-                name: "Manorama News", 
-                channelId: "UCP0uG-mcMImgKnJz-VjJZmQ",
-                logo: "manorama.png"
-            },
-            { 
-                name: "Mathrubhumi News", 
-                channelId: "UCwXrBBZnIh2ER4lal6WbAHw",
-                logo: "mathrubhumi.png"
-            },
-            { 
-                name: "MediaOne", 
-                channelId: "UC-f7r46JhYv78q5pGrO6ivA",
-                logo: "mediaone.png"
-            },
-            { 
-                name: "Reporter TV", 
-                channelId: "UCFx1nseXKTc1Culiu3neeSQ",
-                logo: "reporter.png"
-            },
-            {
-                name: "News18 Kerala", 
-                channelId: "UC-mMi78WJST4N5o8_i1FoXw",
-                logo: "news18.png"
-            },
-            { 
-                name: "BIG TV", 
-                channelId: "UClFe5TPbW1MVrOPpbNHTDoQ",
-                logo: "bigtv.png"
-            },
-
-            { 
-                name: "News Malayalam", 
-                channelId: "UCXp6JTdq7-WwBK09S7SzmxQ",
-                logo: "newsmalayalam.png"
-            }
+        // ഇവിടെ മാനുവൽ videoId നൽകേണ്ടതില്ല. ഓട്ടോമാറ്റിക് ചാനൽ ഐഡി മാത്രം നൽകിയാൽ മതി!
+        const channels = [
+            { name: "24 News", channelId: "UCup3etEdjyF1L3sRbU-rKLw", logo: "24.png" },
+            { name: "Asianet News", channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw", logo: "asianet.png" },
+            { name: "Manorama News", channelId: "UCP0uG-mcMImgKnJz-VjJZmQ", logo: "manorama.png" },
+            { name: "Mathrubhumi News", channelId: "UCwXrBBZnIh2ER4lal6WbAHw", logo: "mathrubhumi.png" },
+            { name: "MediaOne", channelId: "UC-f7r46JhYv78q5pGrO6ivA", logo: "mediaone.png" },
+            { name: "Reporter TV", channelId: "UCFx1nseXKTc1Culiu3neeSQ", logo: "reporter.png" },
+            { name: "News18 Kerala", channelId: "UC-mMi78WJST4N5o8_i1FoXw", logo: "news18.png" },
+            { name: "BIG TV", channelId: "UClFe5TPbW1MVrOPpbNHTDoQ", logo: "bigtv.png" },
+            { name: "News Malayalam", channelId: "UCXp6JTdq7-WwBK09S7SzmxQ", logo: "newsmalayalam.png" }
         ];
-
 
         let currentIndex = -1;
         let mainExitClickedOnce = false;
+        let ytPlayer = null;
+        let isMuted = false;
+
+        // YouTube IFrame API സജ്ജമാക്കുന്നു
+        function onYouTubeIframeAPIReady() {
+            ytPlayer = new YT.Player('yt-player', {
+                height: '100%',
+                width: '100%',
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 1,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'playsinline': 1
+                },
+                events: {
+                    'onError': onErrorHandle
+                }
+            });
+        }
+
+        // വീഡിയോ ഐഡി തെറ്റുകയോ ലൈവ് മാറുകയോ ചെയ്താൽ ഓട്ടോമാറ്റിക് അടുത്ത ലൈവിലേക്ക് റീഡയറക്ട് ചെയ്യുന്ന ലോജിക്
+        function onErrorHandle(event) {
+            console.log("Stream Error Encountered. Auto Switching Live Stream...");
+            if (currentIndex !== -1) {
+                const channel = channels[currentIndex];
+                ytPlayer.loadPlaylist({
+                    listType: 'playlist',
+                    list: 'UU' + channel.channelId.substring(2)
+                });
+            }
+        }
 
         function buildGrid() {
             const grid = document.getElementById('grid-container');
@@ -403,28 +399,21 @@
             isMuted = false;
             const muteBtn = document.getElementById('mute-toggle-btn');
             if (muteBtn) muteBtn.textContent = '🔊';
+
             const channel = channels[currentIndex];
             const playerBox = document.getElementById('player-box');
-            const player = document.getElementById('tv-player');
 
-            const src = channel.videoId
-                ? `https://www.youtube.com/embed/${channel.videoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`
-                : `https://www.youtube.com/embed/live_stream?channel=${channel.channelId}&autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
-            player.src = src;
             playerBox.style.display = "block";
 
-            playerBox.scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => requestHighestQuality(), 2500);
-        }
+            if (ytPlayer && ytPlayer.loadPlaylist) {
+                // ചാനലിന്റെ അപ്‌ലോഡ് ലൈവ് ലിസ്റ്റ് നേരിട്ട് പ്ലെയറിലേക്ക് ഫീഡ് ചെയ്യുന്നു (ഓട്ടോ അപ്‌ഡേറ്റ് ആയിക്കൊള്ളും)
+                ytPlayer.loadPlaylist({
+                    listType: 'playlist',
+                    list: 'UU' + channel.channelId.substring(2)
+                });
+            }
 
-        function requestHighestQuality() {
-            const player = document.getElementById('tv-player');
-            if (!player || !player.contentWindow) return;
-            player.contentWindow.postMessage(JSON.stringify({
-                event: 'command',
-                func: 'setPlaybackQuality',
-                args: ['hd1080']
-            }), '*');
+            playerBox.scrollIntoView({ behavior: 'smooth' });
         }
 
         function changeChannel(direction) {
@@ -441,10 +430,11 @@
 
         function stopAndExitPlayer() {
             const playerBox = document.getElementById('player-box');
-            const player = document.getElementById('tv-player');
 
             if (!mainExitClickedOnce && playerBox.style.display === "block") {
-                player.src = "";
+                if (ytPlayer && ytPlayer.stopVideo) {
+                    ytPlayer.stopVideo();
+                }
                 playerBox.style.display = "none";
                 currentIndex = -1;
                 mainExitClickedOnce = true;
@@ -475,13 +465,9 @@
 
             try {
                 const target = document.documentElement;
-                const enterFS = target.requestFullscreen
-                    ? target.requestFullscreen()
-                    : target.webkitRequestFullscreen
-                        ? target.webkitRequestFullscreen()
-                        : target.msRequestFullscreen
-                            ? target.msRequestFullscreen()
-                            : null;
+                if (target.requestFullscreen) target.requestFullscreen();
+                else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+                else if (target.msRequestFullscreen) target.msRequestFullscreen();
             } catch (e) {}
         }
 
@@ -496,13 +482,9 @@
             updateStretchButtonLabel();
 
             if (document.fullscreenElement || document.webkitFullscreenElement) {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen().catch(() => {});
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+                if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+                else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+                else if (document.msExitFullscreen) document.msExitFullscreen();
             }
         }
 
@@ -557,17 +539,19 @@
             }
         }
 
-        let isMuted = false;
-
         function toggleMute() {
-            const player = document.getElementById('tv-player');
             const btn = document.getElementById('mute-toggle-btn');
-            if (!player || !player.contentWindow) return;
+            if (!ytPlayer) return;
 
-            const func = isMuted ? 'unMute' : 'mute';
-            player.contentWindow.postMessage(JSON.stringify({ event: 'command', func: func, args: [] }), '*');
-            isMuted = !isMuted;
-            if (btn) btn.textContent = isMuted ? '🔇' : '🔊';
+            if (ytPlayer.isMuted()) {
+                ytPlayer.unMute();
+                isMuted = false;
+                if (btn) btn.textContent = '🔊';
+            } else {
+                ytPlayer.mute();
+                isMuted = true;
+                if (btn) btn.textContent = '🔇';
+            }
         }
 
         function handleFullscreenChange() {
@@ -614,3 +598,4 @@
     </script>
 </body>
 </html>
+
