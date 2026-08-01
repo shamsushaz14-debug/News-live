@@ -13,12 +13,6 @@
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon.png" type="image/png">
     <link rel="apple-touch-icon" href="icon.png">
-        <!-- YouTube Preconnect & DNS Prefetch for Blazing Speed -->
-    <link rel="preconnect" href="https://www.youtube.com">
-    <link rel="preconnect" href="https://s.ytimg.com">
-    <link rel="preconnect" href="https://i.ytimg.com">
-    <link rel="dns-prefetch" href="https://www.youtube.com">
-    <link rel="dns-prefetch" href="https://i.ytimg.com">
 
     <style>
         * {
@@ -333,7 +327,7 @@
         <p>Developed by Shamsu Shaz © 2026</p>
     </footer>
 
-    <<script>
+    <script>
         const channels = [
             { 
                 name: "24 News", 
@@ -366,6 +360,12 @@
                 logo: "reporter.png"
             },
             { 
+                name: "News18 Kerala", 
+                channelId: "UC-mMi78WJST4N5o8_i1FoXw",
+                isAutoLive: true,
+                logo: "news18.png"
+            },
+            { 
                 name: "BIG TV", 
                 channelId: "UClFe5TPbW1MVrOPpbNHTDoQ", 
                 isAutoLive: true,
@@ -375,15 +375,8 @@
                 name: "News Malayalam", 
                 channelId: "UCXp6JTdq7-WwBK09S7SzmxQ",
                 logo: "newsmalayalam.png"
-            },
-            { 
-                name: "Real News Kerala", 
-                channelId: "UCJk3Yv4C7K1R2T_H9m8t4qA", 
-                isAutoLive: true,
-                logo: "realnews.png"
             }
         ];
-
 
         let currentIndex = -1;
         let mainExitClickedOnce = false;
@@ -651,4 +644,4 @@
         window.onload = buildGrid;
     </script>
 </body>
-    </html>
+</html>
