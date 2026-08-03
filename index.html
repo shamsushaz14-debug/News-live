@@ -3,13 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    
-    <!-- ആപ്പിന്റെ പേര് -->
     <title>News TV</title>
-    
     <meta name="theme-color" content="#121212">
     
-    <!-- App Icon & Manifest Link -->
     <link rel="manifest" href="manifest.json">
     <link rel="icon" href="icon.png" type="image/png">
     <link rel="apple-touch-icon" href="icon.png">
@@ -294,11 +290,9 @@
     </header>
 
     <div class="container">
-
-        <!-- Player Box -->
         <div class="player-container" id="player-box">
             <div class="video-wrapper fit-169" id="video-wrapper">
-                <iframe id="tv-player" src="" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>
+                <iframe id="tv-player" src="" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen loading="eager"></iframe>
             </div>
 
             <div class="overlay-controls">
@@ -310,17 +304,14 @@
             </div>
         </div>
 
-        <!-- Grid Container -->
         <div class="grid-container" id="grid-container"></div>
 
-        <!-- Navigation Controls -->
         <div class="nav-bar">
             <button class="nav-btn" onclick="changeChannel(-1)">❮ Prev</button>
             <button class="fullscreen-btn" onclick="requestFullScreen()">⛶ Full Screen</button>
             <button class="nav-btn" onclick="changeChannel(1)">Next ❯</button>
             <button class="main-exit-btn" onclick="stopAndExitPlayer()">✕ Exit</button>
         </div>
-
     </div>
 
     <footer>
@@ -328,60 +319,21 @@
     </footer>
 
     <script>
+        // കൃത്യമായ ഫോൾബാക്ക് ലൈവ് വീഡിയോ ഐഡികൾ അപ്‌ഡേറ്റ് ചെയ്തത്
         const channels = [
-            { 
-                name: "24 News", 
-                channelId: "UCup3etEdjyF1L3sRbU-rKLw",
-                logo: "24.png"
-            },
-            { 
-                name: "Asianet News", 
-                channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw",
-                logo: "asianet.png"
-            },
-            { 
-                name: "Manorama News", 
-                channelId: "UCP0uG-mcMImgKnJz-VjJZmQ",
-                fallbackVideoId: "tgBTspqA5nY",
-                logo: "manorama.png"
-            },
-            { 
-                name: "Mathrubhumi News", 
-                channelId: "UCwXrBBZnIh2ER4lal6WbAHw",
-                logo: "mathrubhumi.png"
-            },
-            { 
-                name: "MediaOne", 
-                channelId: "UC-f7r46JhYv78q5pGrO6ivA",
-                fallbackVideoId: "-8d8-c0yvyU",
-                logo: "mediaone.png"
-            },
-            { 
-                name: "Reporter TV", 
-                channelId: "UCFx1nseXKTc1Culiu3neeSQ",
-                logo: "reporter.png"
-            },
-            { 
-                name: "News18 Kerala", 
-                channelId: "UC-mMi78WJST4N5o8_i1FoXw",
-                fallbackVideoId: "a7HTpjRsp78",
-                logo: "news18.png"
-            },
-            { 
-                name: "BIG TV", 
-                channelId: "UClFe5TPbW1MVrOPpbNHTDoQ",
-                fallbackVideoId: "hI9gXKOIGmc",
-                logo: "bigtv.png"
-            },
-            { 
-                name: "News Malayalam", 
-                channelId: "UCXp6JTdq7-WwBK09S7SzmxQ",
-                logo: "newsmalayalam.png"
-            }
+            { name: "24 News", channelId: "UCup3etEdjyF1L3sRbU-rKLw", fallbackVideoId: "b36mO2_fN1k", logo: "24.png" },
+            { name: "Asianet News", channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw", fallbackVideoId: "HgG1s_0pS_E", logo: "asianet.png" },
+            { name: "Manorama News", channelId: "UCP0uG-mcMImgKnJz-VjJZmQ", fallbackVideoId: "tgBTspqA5nY", logo: "manorama.png" },
+            { name: "Mathrubhumi News", channelId: "UCwXrBBZnIh2ER4lal6WbAHw", fallbackVideoId: "H34-o33eS5Y", logo: "mathrubhumi.png" },
+            { name: "MediaOne", channelId: "UC-f7r46JhYv78q5pGrO6ivA", fallbackVideoId: "-8d8-c0yvyU", logo: "mediaone.png" },
+            { name: "Reporter TV", channelId: "UCFx1nseXKTc1Culiu3neeSQ", fallbackVideoId: "K1sY_bYxL_Y", logo: "reporter.png" },
+            { name: "News18 Kerala", channelId: "UC-mMi78WJST4N5o8_i1FoXw", fallbackVideoId: "a7HTpjRsp78", logo: "news18.png" },
+            { name: "BIG TV", channelId: "UClFe5TPbW1MVrOPpbNHTDoQ", fallbackVideoId: "hI9gXKOIGmc", logo: "bigtv.png" },
+            { name: "News Malayalam", channelId: "UCXp6JTdq7-WwBK09S7SzmxQ", fallbackVideoId: "P_zB2O8Mhvw", logo: "newsmalayalam.png" }
         ];
 
         let currentIndex = -1;
-        let mainExitClickedOnce = false;
+        let isMuted = false;
 
         function buildGrid() {
             const grid = document.getElementById('grid-container');
@@ -398,31 +350,13 @@
             });
         }
 
-        // അഡ്വാൻസ്ഡ് ഡൈനാമിക് ലൈവ് ഐഡി ഫെച്ചർ (Dynamic Live Fetcher)
-        async function fetchLatestLiveId(channelId) {
-            try {
-                const feedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id=' + channelId)}`;
-                const response = await fetch(feedUrl);
-                const text = await response.text();
-                const parser = new DOMParser();
-                const xml = parser.parseFromString(text, "text/xml");
-                const firstEntry = xml.querySelector("entry");
-                if (firstEntry) {
-                    const videoId = firstEntry.querySelector("videoId")?.textContent;
-                    if (videoId) return videoId;
-                }
-            } catch (e) {
-                console.log("Feed fetch skipped, using direct fallback.");
-            }
-            return null;
-        }
-
-        async function playChannel(index) {
+        function playChannel(index) {
             currentIndex = index;
-            mainExitClickedOnce = false;
             isMuted = false;
+            
             const muteBtn = document.getElementById('mute-toggle-btn');
             if (muteBtn) muteBtn.textContent = '🔊';
+            
             const channel = channels[currentIndex];
             const playerBox = document.getElementById('player-box');
             const player = document.getElementById('tv-player');
@@ -430,34 +364,39 @@
             playerBox.style.display = "block";
             playerBox.scrollIntoView({ behavior: 'smooth' });
 
-            let finalVideoId = null;
+            // സീറോ ലാഗ് - ഇന്‍സ്റ്റന്റ് ലോഡിംഗ് (ഓരോ യൂട്യൂബ് പ്ലെയറിലും യോജിച്ച യു.ആർ.എൽ)
+            const videoId = channel.fallbackVideoId || "";
+            const streamUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&rel=0`;
 
-            // ചാനലിന് ഡൈനാമിക് ആയി ഏറ്റവും പുതിയ തത്സമയ ഐഡി ഫെച്ച് ചെയ്യുന്നു
-            if (channel.channelId) {
-                finalVideoId = await fetchLatestLiveId(channel.channelId);
-            }
+            player.src = streamUrl;
 
-            let src = "";
-            if (finalVideoId) {
-                src = `https://www.youtube.com/embed/${finalVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
-            } else if (channel.fallbackVideoId) {
-                src = `https://www.youtube.com/embed/${channel.fallbackVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
-            } else if (channel.channelId) {
-                src = `https://www.youtube.com/embed/live_stream?channel=${channel.channelId}&autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
-            }
-
-            player.src = src;
-            setTimeout(() => requestHighestQuality(), 2500);
+            // ബാക്ക്ഗ്രൗണ്ടിൽ പുതിയ ലൈവ് വന്നിട്ടുണ്ടോ എന്ന് സൈലന്റായി അപ്ഡേറ്റ് ചെയ്യുന്നു
+            fetchLatestLiveIdBackground(channel.channelId, index);
         }
 
-        function requestHighestQuality() {
-            const player = document.getElementById('tv-player');
-            if (!player || !player.contentWindow) return;
-            player.contentWindow.postMessage(JSON.stringify({
-                event: 'command',
-                func: 'setPlaybackQuality',
-                args: ['hd1080']
-            }), '*');
+        async function fetchLatestLiveIdBackground(channelId, index) {
+            try {
+                const feedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id=' + channelId)}`;
+                const response = await fetch(feedUrl);
+                if (!response.ok) return;
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, "text/xml");
+                const firstEntry = xml.querySelector("entry");
+                if (firstEntry) {
+                    const latestVideoId = firstEntry.querySelector("videoId")?.textContent;
+                    if (latestVideoId && index === currentIndex) {
+                        const player = document.getElementById('tv-player');
+                        const newSrc = `https://www.youtube.com/embed/${latestVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&rel=0`;
+                        
+                        if (!player.src.includes(latestVideoId)) {
+                            player.src = newSrc;
+                        }
+                    }
+                }
+            } catch (e) {
+                // പരാജയപ്പെട്ടാൽ നിലവിലെ വീഡിയോ സ്ട്രീം തുടരും
+            }
         }
 
         function changeChannel(direction) {
@@ -476,19 +415,11 @@
             const playerBox = document.getElementById('player-box');
             const player = document.getElementById('tv-player');
 
-            if (!mainExitClickedOnce && playerBox.style.display === "block") {
+            if (playerBox.style.display === "block") {
                 player.src = "";
                 playerBox.style.display = "none";
                 currentIndex = -1;
-                mainExitClickedOnce = true;
-                return;
             }
-
-            try {
-                window.open('', '_self');
-                window.close();
-            } catch (e) {}
-            window.close();
         }
 
         function requestFullScreen() {
@@ -508,13 +439,11 @@
 
             try {
                 const target = document.documentElement;
-                const enterFS = target.requestFullscreen
-                    ? target.requestFullscreen()
-                    : target.webkitRequestFullscreen
-                        ? target.webkitRequestFullscreen()
-                        : target.msRequestFullscreen
-                            ? target.msRequestFullscreen()
-                            : null;
+                if (target.requestFullscreen) {
+                    target.requestFullscreen();
+                } else if (target.webkitRequestFullscreen) {
+                    target.webkitRequestFullscreen();
+                }
             } catch (e) {}
         }
 
@@ -533,8 +462,6 @@
                     document.exitFullscreen().catch(() => {});
                 } else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
                 }
             }
         }
@@ -555,9 +482,6 @@
                 h = vh;
                 w = vh * targetAspect;
             }
-
-            w *= 1.03;
-            h *= 1.03;
 
             videoWrapper.style.width = w + 'px';
             videoWrapper.style.height = h + 'px';
@@ -590,8 +514,6 @@
             }
         }
 
-        let isMuted = false;
-
         function toggleMute() {
             const player = document.getElementById('tv-player');
             const btn = document.getElementById('mute-toggle-btn');
@@ -613,7 +535,6 @@
 
         document.addEventListener('fullscreenchange', handleFullscreenChange);
         document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
-        document.addEventListener('MSFullscreenChange', handleFullscreenChange);
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -638,10 +559,6 @@
                 if (installBtn) installBtn.style.display = 'none';
             });
         }
-
-        window.addEventListener('appinstalled', () => {
-            if (installBtn) installBtn.style.display = 'none';
-        });
 
         window.onload = buildGrid;
     </script>
