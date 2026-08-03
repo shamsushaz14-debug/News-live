@@ -342,7 +342,7 @@
             { 
                 name: "Manorama News", 
                 channelId: "UCP0uG-mcMImgKnJz-VjJZmQ",
-                videoId: "27ASgNsbfUA",
+                fallbackVideoId: "tgBTspqA5nY",
                 logo: "manorama.png"
             },
             { 
@@ -353,6 +353,7 @@
             { 
                 name: "MediaOne", 
                 channelId: "UC-f7r46JhYv78q5pGrO6ivA",
+                fallbackVideoId: "-8d8-c0yvyU",
                 logo: "mediaone.png"
             },
             { 
@@ -363,12 +364,13 @@
             { 
                 name: "News18 Kerala", 
                 channelId: "UC-mMi78WJST4N5o8_i1FoXw",
+                fallbackVideoId: "a7HTpjRsp78",
                 logo: "news18.png"
             },
             { 
                 name: "BIG TV", 
                 channelId: "UClFe5TPbW1MVrOPpbNHTDoQ",
-                videoId: "hI9gXKOIGmc",
+                fallbackVideoId: "hI9gXKOIGmc",
                 logo: "bigtv.png"
             },
             { 
@@ -396,7 +398,26 @@
             });
         }
 
-        function playChannel(index) {
+        // അഡ്വാൻസ്ഡ് ഡൈനാമിക് ലൈവ് ഐഡി ഫെച്ചർ (Dynamic Live Fetcher)
+        async function fetchLatestLiveId(channelId) {
+            try {
+                const feedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://www.youtube.com/feeds/videos.xml?channel_id=' + channelId)}`;
+                const response = await fetch(feedUrl);
+                const text = await response.text();
+                const parser = new DOMParser();
+                const xml = parser.parseFromString(text, "text/xml");
+                const firstEntry = xml.querySelector("entry");
+                if (firstEntry) {
+                    const videoId = firstEntry.querySelector("videoId")?.textContent;
+                    if (videoId) return videoId;
+                }
+            } catch (e) {
+                console.log("Feed fetch skipped, using direct fallback.");
+            }
+            return null;
+        }
+
+        async function playChannel(index) {
             currentIndex = index;
             mainExitClickedOnce = false;
             isMuted = false;
@@ -406,18 +427,26 @@
             const playerBox = document.getElementById('player-box');
             const player = document.getElementById('tv-player');
 
-            let src = "";
+            playerBox.style.display = "block";
+            playerBox.scrollIntoView({ behavior: 'smooth' });
 
-            if (channel.videoId) {
-                src = `https://www.youtube.com/embed/${channel.videoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
+            let finalVideoId = null;
+
+            // ചാനലിന് ഡൈനാമിക് ആയി ഏറ്റവും പുതിയ തത്സമയ ഐഡി ഫെച്ച് ചെയ്യുന്നു
+            if (channel.channelId) {
+                finalVideoId = await fetchLatestLiveId(channel.channelId);
+            }
+
+            let src = "";
+            if (finalVideoId) {
+                src = `https://www.youtube.com/embed/${finalVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
+            } else if (channel.fallbackVideoId) {
+                src = `https://www.youtube.com/embed/${channel.fallbackVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
             } else if (channel.channelId) {
                 src = `https://www.youtube.com/embed/live_stream?channel=${channel.channelId}&autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
             }
 
             player.src = src;
-            playerBox.style.display = "block";
-
-            playerBox.scrollIntoView({ behavior: 'smooth' });
             setTimeout(() => requestHighestQuality(), 2500);
         }
 
