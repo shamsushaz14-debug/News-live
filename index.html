@@ -330,58 +330,66 @@
     <script>
         const channels = [
             { 
+                id: 0,
                 name: "24 News", 
                 channelId: "UCup3etEdjyF1L3sRbU-rKLw",
                 fallbackVideoId: "1wECsnGZcfc",
                 logo: "24.png"
             },
             { 
+                id: 1,
                 name: "Asianet News", 
                 channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw",
                 fallbackVideoId: "s0LLVQeMmtU",
                 logo: "asianet.png"
             },
             { 
+                id: 2, 
                 name: "Manorama News", 
-                channelId: "UCP0uG-mcMImgKnJz-VjJZmQ",
-                fallbackVideoId: "Oh5rAeVWnww",
-                logo: "manorama.png"
+                liveVideoId: "tgBTspqA5nY", 
+                logo: "manorama.png" 
             },
             { 
+                id: 3,
                 name: "Mathrubhumi News", 
                 channelId: "UCwXrBBZnIh2ER4lal6WbAHw",
                 fallbackVideoId: "RbxEftGN584",
                 logo: "mathrubhumi.png"
             },
             { 
+                id: 4,
                 name: "MediaOne", 
                 channelId: "UC-f7r46JhYv78q5pGrO6ivA",
                 fallbackVideoId: "-8d8-c0yvyU",
                 logo: "mediaone.png"
             },
             { 
+                id: 5,
                 name: "Reporter TV", 
                 channelId: "UCFx1nseXKTc1Culiu3neeSQ",
                 fallbackVideoId: "nObUcHKZEGY",
                 logo: "reporter.png"
             },
             { 
+                id: 6,
                 name: "BIG TV", 
                 channelId: "UClFe5TPbW1MVrOPpbNHTDoQ",
                 fallbackVideoId: "hI9gXKOIGmc",
                 logo: "bigtv.png"
             },
             { 
+                id: 7,
                 name: "News Malayalam", 
                 channelId: "UCXp6JTdq7-WwBK09S7SzmxQ",
                 fallbackVideoId: "P9MITjM250c",
                 logo: "newsmalayalam.png"
             },
             { 
+                id: 8, 
                 name: "News18 Kerala", 
-                channelId: "UC-mMi78WJST4N5o8_i1FoXw",
-                fallbackVideoId: "HH4MWKSwa5E",
-                logo: "news18.png"
+                liveVideoId: "ke-BZTwtxWk", 
+                channelId: "UC-mMi78WJST4N5o8_i1FoXw", 
+                logo: "news18.png" 
             }
         ];
 
@@ -418,19 +426,20 @@
             playerBox.style.display = "block";
             playerBox.scrollIntoView({ behavior: 'smooth' });
 
-            // 1. ഇൻസ്റ്റന്റ് സ്ട്രീം പ്ലേബാക്ക് (Instant Play Strategy)
+            // 1. ഇൻസ്റ്റന്റ് സ്ട്രീം പ്ലേബാക്ക് (liveVideoId, fallbackVideoId, channelId എന്നിവ പരിശോധിക്കുന്നു)
+            let videoId = channel.liveVideoId || channel.fallbackVideoId;
             let initialSrc = "";
-            if (channel.fallbackVideoId) {
-                initialSrc = `https://www.youtube.com/embed/${channel.fallbackVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
-            } else {
+            
+            if (videoId) {
+                initialSrc = `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
+            } else if (channel.channelId) {
                 initialSrc = `https://www.youtube.com/embed/live_stream?channel=${channel.channelId}&autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
             }
 
-            // ഉപയോക്താവിന് താമസമില്ലാതെ ഉടൻ കാണിച്ചു നൽകുന്നു
             player.src = initialSrc;
 
-            // 2. ബാക്ക്ഗ്രൗണ്ടിൽ വച്ച് അപ്‌ഡേറ്റഡ് ഐഡി ഉണ്ടോയെന്ന് പരിശോധിക്കൽ (Background Verification)
-            if (channel.fallbackVideoId) {
+            // 2. ബാക്ക്ഗ്രൗണ്ടിൽ വച്ച് അപ്‌ഡേറ്റഡ് ഐഡി ഉണ്ടോയെന്ന് പരിശോധിക്കൽ
+            if (channel.channelId) {
                 fetchLatestLiveIdBackground(channel.channelId, index);
             }
         }
@@ -450,14 +459,13 @@
                         const player = document.getElementById('tv-player');
                         const newSrc = `https://www.youtube.com/embed/${latestVideoId}?autoplay=1&mute=0&enablejsapi=1&playsinline=1&vq=hd1080`;
                         
-                        // നിലവിലെ വീഡിയോയിൽ നിന്നും മാറിയെങ്കിൽ മാത്രം റീലോഡ് ചെയ്യുക
                         if (!player.src.includes(latestVideoId)) {
                             player.src = newSrc;
                         }
                     }
                 }
             } catch (e) {
-                // ബാക്ക്ഗ്രൗണ്ട് ലോഗിക് പരാജയപ്പെട്ടാൽ ആദ്യത്തെ ഇന്‍സ്റ്റന്റ് ലിങ്കിൽ തന്നെ പ്ലേ ആവും
+                // പരാജയപ്പെട്ടാൽ ആദ്യത്തെ ഇന്‍സ്റ്റന്റ് ലിങ്കിൽ തന്നെ പ്ലേ ആവും
             }
         }
 
@@ -648,3 +656,4 @@
     </script>
 </body>
 </html>
+
