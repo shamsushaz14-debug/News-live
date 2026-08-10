@@ -23,8 +23,9 @@
             --text-color: #ffffff;
             --subtext-color: #aaa;
             --header-bg: #1e1e1e;
-            --border-color: #2a2a2a;
+            --border-color: #e85f54; /* Borderline updated to #e85f54 */
             --accent-teal: #00b2a9;
+            --primary-coral: #e85f54; /* Custom primary theme color */
         }
 
         .light-mode {
@@ -33,14 +34,14 @@
             --text-color: #2f3640;
             --subtext-color: #718093;
             --header-bg: #ffffff;
-            --border-color: #dcdde1;
+            --border-color: #e85f54;
         }
 
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Manjari", "Meera", sans-serif;
             transition: background-color 0.2s ease, color 0.2s ease;
             -webkit-tap-highlight-color: transparent;
         }
@@ -92,10 +93,9 @@
             align-items: center;
         }
 
-        /* 🔴 LIVE Badge Styling (Background Removed) */
         .live-badge {
             background-color: transparent;
-            color: #ffffff;
+            color: var(--primary-coral);
             font-size: 0.65rem;
             font-weight: 800;
             padding: 2px 8px;
@@ -105,31 +105,31 @@
             align-items: center;
             gap: 4px;
             margin-bottom: 2px;
-            box-shadow: none;
             animation: pulse-live 1.5s infinite;
         }
 
         @keyframes pulse-live {
             0% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(0.95); }
+            50% { opacity: 0.7; transform: scale(0.95); }
             100% { opacity: 1; transform: scale(1); }
         }
 
+        /* News TV name color changed to #e85f54 */
         .header-title h1 {
             font-size: 1.35rem;
-            color: #ff4757;
+            color: #e85f54;
             margin: 0;
             line-height: 1.1;
         }
 
         .header-title h1 .tv-text {
             font-size: 0.85em;
+            color: #e85f54;
         }
 
-        /* Continuous Seamless Scrolling Text (Width Increased) */
         .scroll-container {
             width: 100%;
-            max-width: 320px; /* Width 220px-ൽ നിന്ന് 320px ആക്കി കൂട്ടി */
+            max-width: 320px;
             overflow: hidden;
             white-space: nowrap;
             margin-top: 3px;
@@ -142,7 +142,7 @@
             font-weight: 600;
             color: var(--subtext-color);
             padding-right: 50px;
-            animation: scroll-left 10s linear infinite;
+            animation: scroll-left 12s linear infinite;
             will-change: transform;
             flex-shrink: 0;
         }
@@ -152,9 +152,10 @@
             100% { transform: translateX(-100%); }
         }
 
+        /* Dark mode button icon & border changed to #e85f54 */
         .theme-toggle-btn {
             background: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid #ff4757;
+            border: 1.5px solid #e85f54;
             color: var(--text-color);
             width: 32px;
             height: 32px;
@@ -168,14 +169,40 @@
             padding: 0;
         }
 
-        .theme-toggle-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: #ff4757;
+        .theme-toggle-btn svg { 
+            fill: #e85f54; 
+            width: 16px; 
+            height: 16px; 
         }
 
-        .theme-toggle-btn:active {
+        .teal-refresh-btn {
+            border: 1.5px solid var(--accent-teal);
+            background: rgba(0, 178, 169, 0.08);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            outline: none;
+            padding: 0;
+        }
+
+        .teal-refresh-btn svg { fill: var(--accent-teal); width: 16px; height: 16px; }
+
+        .theme-toggle-btn:active, .teal-refresh-btn:active {
             transform: scale(0.9);
+        }
+
+        .spin-icon {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .icon-btn {
@@ -187,44 +214,6 @@
             font-size: 0.8rem;
             cursor: pointer;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .teal-refresh-btn {
-            background: rgba(0, 178, 169, 0.08);
-            border: 1.5px solid var(--accent-teal);
-            color: var(--accent-teal);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-            outline: none;
-            padding: 0;
-        }
-
-        .teal-refresh-btn svg {
-            width: 16px;
-            height: 16px;
-            fill: var(--accent-teal);
-        }
-
-        .teal-refresh-btn:active {
-            transform: scale(0.9);
-        }
-
-        .spin-icon {
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         .container {
@@ -243,7 +232,7 @@
             background: #000;
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            will-change: transform;
+            border: 1px solid var(--border-color);
         }
 
         .video-wrapper {
@@ -252,7 +241,6 @@
             height: 0;
             background: #000;
             width: 100%;
-            overflow: hidden;
         }
 
         .video-wrapper iframe {
@@ -277,6 +265,7 @@
             align-items: center !important;
             justify-content: center !important;
             background: #000 !important;
+            border: none !important;
         }
 
         .player-container.fullscreen-mode .video-wrapper {
@@ -296,7 +285,7 @@
             height: 100vh !important;
             max-height: 100vh !important;
             max-width: 100vw !important;
-            transform: translate(-50%, -50%) scale(1.3) !important;
+            transform: translate(-50%, -50%) scale(1.25) !important;
         }
 
         .ch-center-left, .ch-center-right {
@@ -307,24 +296,28 @@
             display: none;
         }
 
-        .ch-center-left { left: 20px; }
-        .ch-center-right { right: 20px; }
+        .ch-center-left { left: 15px; }
+        .ch-center-right { right: 15px; }
 
         .player-container.fullscreen-mode .ch-center-left,
         .player-container.fullscreen-mode .ch-center-right {
             display: block;
         }
 
-        .bottom-left-controls {
+        .bottom-left-controls, .bottom-right-group {
             position: absolute;
             bottom: 20px;
-            left: 20px;
             z-index: 2147483647;
             display: none;
         }
 
-        .player-container.fullscreen-mode .bottom-left-controls {
+        .bottom-left-controls { left: 20px; }
+        .bottom-right-group { right: 20px; gap: 10px; }
+
+        .player-container.fullscreen-mode .bottom-left-controls,
+        .player-container.fullscreen-mode .bottom-right-group {
             display: flex;
+            align-items: center;
         }
 
         .fs-btn {
@@ -335,9 +328,6 @@
             border-radius: 20px;
             font-size: 0.85rem;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             font-weight: bold;
             backdrop-filter: blur(4px);
         }
@@ -345,91 +335,64 @@
         .fs-btn.mute-btn {
             background-color: var(--accent-teal);
             border: none;
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             padding: 0;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .fs-btn.mute-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: #000000;
-        }
-
-        .bottom-right-group {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            z-index: 2147483647;
-            display: none;
-            gap: 10px;
-        }
-
-        .player-container.fullscreen-mode .bottom-right-group {
             display: flex;
             align-items: center;
+            justify-content: center;
         }
 
+        .fs-btn.mute-btn svg { width: 22px; height: 22px; fill: #000; }
+
         .round-action-btn {
-            width: 48px;
-            height: 48px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.1rem;
+            font-size: 0.8rem;
             font-weight: bold;
             cursor: pointer;
             backdrop-filter: blur(4px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
-
-        .stretch-btn-round {
-            background-color: var(--accent-teal);
             border: none;
-            color: #000000;
         }
 
-        .stretch-btn-round svg {
-            width: 22px;
-            height: 22px;
-            stroke: #000000;
-        }
+        .stretch-btn-round { background-color: var(--accent-teal); color: #000; }
+        .stretch-btn-round svg { width: 20px; height: 20px; stroke: #000; }
 
-        .bottom-exit-btn {
-            background-color: rgba(255, 71, 87, 0.9);
-            border: none;
-            font-size: 0.75rem;
-            color: white;
+        /* Exit landscape mode button changed to #e85f54 */
+        .bottom-exit-btn { 
+            background-color: #e85f54; 
+            color: #ffffff;
         }
 
         .section-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             margin: 15px 0 10px 0;
             color: var(--subtext-color);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            font-weight: 600;
         }
 
         .tv-section-icon {
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             fill: var(--accent-teal);
-            display: inline-block;
-            vertical-align: middle;
-            flex-shrink: 0;
         }
 
         .grid-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
+            gap: 10px;
         }
 
+        /* Borderline for channel cards updated to #e85f54 */
         .card {
             background-color: var(--card-bg);
             border-radius: 12px;
@@ -441,13 +404,9 @@
             border: 1px solid var(--border-color);
             cursor: pointer;
             position: relative;
-            transform: translateZ(0);
         }
 
-        .card:active {
-            transform: scale(0.95);
-            border-color: #ff4757;
-        }
+        .card:active { transform: scale(0.96); }
 
         .fav-star {
             position: absolute;
@@ -455,15 +414,8 @@
             right: 6px;
             background: transparent;
             border: none;
-            outline: none;
             cursor: pointer;
             z-index: 10;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
         }
 
         .fav-star svg {
@@ -472,16 +424,13 @@
             fill: transparent;
             stroke: var(--text-color);
             stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
             opacity: 0.35;
-            transition: all 0.2s ease;
         }
 
         .fav-star.active svg {
-            fill: var(--text-color);
-            stroke: var(--text-color);
-            opacity: 0.9;
+            fill: #e85f54;
+            stroke: #e85f54;
+            opacity: 1;
         }
 
         .channel-logo {
@@ -492,7 +441,7 @@
             margin-bottom: 6px;
             background-color: #ffffff;
             padding: 2px;
-            border: 1px solid #333;
+            border: 1px solid var(--border-color);
         }
 
         .card span {
@@ -502,21 +451,23 @@
             text-align: center;
         }
 
+        /* Bottom Nav-bar Borderline updated to #e85f54 */
         .nav-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             width: 100%;
             margin-top: 15px;
-            padding: 8px 10px;
+            padding: 8px;
             gap: 8px;
-            background-color: #1a1a1a;
+            background-color: var(--card-bg);
             border-radius: 18px;
-            border: 1px solid #2a2a2a;
+            border: 1px solid var(--border-color);
         }
 
+        /* Next and Previous buttons color changed to #e85f54 */
         .nav-btn {
-            background-color: #ff4d4d;
+            background-color: #e85f54;
             color: white;
             border: none;
             padding: 10px 12px;
@@ -525,46 +476,31 @@
             font-size: 0.8rem;
             cursor: pointer;
             flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
         .fullscreen-btn { 
             background-color: var(--accent-teal); 
-            color: #000000;
+            color: #000;
             border: none;
-            padding: 10px 14px;
+            padding: 10px 12px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 0.8rem;
             cursor: pointer;
             flex: 1.2;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            box-shadow: 0 2px 6px rgba(0, 178, 169, 0.3);
         }
 
+        /* Main Interface Exit button text & border color changed to #e85f54 */
         .smart-exit-btn { 
-            background-color: #0d0d0d; 
-            color: #ff4d4d; 
-            border: 1.5px solid #ff4d4d; 
+            background-color: transparent; 
+            color: #e85f54; 
+            border: 1.5px solid #e85f54; 
             padding: 10px 12px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 0.8rem;
             cursor: pointer;
             flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 3px;
-        }
-
-        .nav-btn:active, .fullscreen-btn:active, .smart-exit-btn:active {
-            transform: scale(0.95);
         }
 
         footer {
@@ -589,13 +525,8 @@
         </div>
 
         <div class="header-title">
-            <!-- 🔴 LIVE Badge -->
             <span class="live-badge">🔴 LIVE</span>
-            
-            <!-- News TV Title -->
             <h1>News <span class="tv-text">TV</span></h1>
-            
-            <!-- Continuous Seamless Auto Scrolling Developer Info -->
             <div class="scroll-container">
                 <span class="scroll-text">Developed by Shamsu Shaz © 2026</span>
                 <span class="scroll-text" aria-hidden="true">Developed by Shamsu Shaz © 2026</span>
@@ -639,7 +570,11 @@
             </div>
 
             <div class="video-wrapper" id="video-wrapper">
-                <iframe id="tv-player" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"></iframe>
+                <iframe id="tv-player"
+                    src=""
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                    loading="eager">
+                </iframe>
             </div>
         </div>
 
@@ -649,11 +584,10 @@
             <div class="grid-container" id="fav-grid-container"></div>
         </div>
 
-        <!-- TV + റിമോട്ട് ഐക്കൺ -->
+        <!-- TV Section -->
         <div class="section-title">
             <svg class="tv-section-icon" viewBox="0 0 24 24">
                 <path d="M2 3h20v13H2V3zm2 2v9h16V5H4zm5 12h6v2H9v-2zm-2 2h10v1.5H7V19z"/>
-                <path d="M15.5 8h2a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1zm.5 1.5v1h1v-1h-1zm0 2v1h1v-1h-1z"/>
             </svg>
             എല്ലാ ചാനലുകളും (All Channels)
         </div>
@@ -661,11 +595,7 @@
 
         <div class="nav-bar">
             <button class="nav-btn" onclick="changeChannel(-1)">❮ Prev</button>
-
-            <button class="fullscreen-btn" onclick="requestFullScreen()" title="Full Screen">
-                ⛶ Full Screen
-            </button>
-            
+            <button class="fullscreen-btn" onclick="requestFullScreen()" title="Full Screen">⛶ Full Screen</button>
             <button class="nav-btn" onclick="changeChannel(1)">Next ❯</button>
             <button class="smart-exit-btn" onclick="handleSmartExit()">✕ Exit</button>
         </div>
@@ -780,9 +710,7 @@
 
         function playChannelById(id) {
             const index = channels.findIndex(ch => ch.id === id);
-            if (index !== -1) {
-                playChannel(index);
-            }
+            if (index !== -1) playChannel(index);
         }
 
         function playChannel(index) {
@@ -793,7 +721,6 @@
 
             if (playerBox.style.display !== "block") {
                 playerBox.style.display = "block";
-                playerBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
 
             const muteParam = isMuted ? 1 : 0;
@@ -810,13 +737,9 @@
             refreshIcon.classList.add('spin-icon');
 
             const currentChannel = channels[currentIndex];
-            let targetUrl = "";
-
-            if (currentChannel.handle) {
-                targetUrl = `https://www.youtube.com/${currentChannel.handle}/live`;
-            } else if (currentChannel.channelId) {
-                targetUrl = `https://www.youtube.com/channel/${currentChannel.channelId}/live`;
-            }
+            let targetUrl = currentChannel.handle 
+                ? `https://www.youtube.com/${currentChannel.handle}/live`
+                : (currentChannel.channelId ? `https://www.youtube.com/channel/${currentChannel.channelId}/live` : "");
 
             if (!targetUrl) {
                 playChannel(currentIndex);
@@ -832,7 +755,6 @@
                 
                 const data = await response.json();
                 const html = data.contents;
-
                 const match = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([^"]+)">/);
                 
                 if (match && match[1]) {
@@ -887,17 +809,10 @@
 
             if (isCurrentFav && favorites.length > 0) {
                 let favIndex = favorites.indexOf(currentChannel.id);
-                let nextFavIndex = favIndex + direction;
-
-                if (nextFavIndex < 0) nextFavIndex = favorites.length - 1;
-                if (nextFavIndex >= favorites.length) nextFavIndex = 0;
-
+                let nextFavIndex = (favIndex + direction + favorites.length) % favorites.length;
                 playChannelById(favorites[nextFavIndex]);
             } else {
-                let newIndex = currentIndex + direction;
-                if (newIndex < 0) newIndex = channels.length - 1;
-                if (newIndex >= channels.length) newIndex = 0;
-
+                let newIndex = (currentIndex + direction + channels.length) % channels.length;
                 playChannel(newIndex);
             }
         }
@@ -942,9 +857,7 @@
             const playerBox = document.getElementById('player-box');
             if (!playerBox) return;
 
-            if (currentIndex === -1) {
-                playChannel(0);
-            }
+            if (currentIndex === -1) playChannel(0);
 
             isStretchMode = false;
             playerBox.classList.remove('ratio-stretch');
@@ -1000,7 +913,10 @@
             } catch (e) {}
         }
 
-        window.onload = buildGrid;
+        window.onload = function() {
+            buildGrid();
+            playChannel(0);
+        };
     </script>
 </body>
 </html>
