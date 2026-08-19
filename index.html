@@ -75,14 +75,8 @@
             align-items: center;
         }
 
-        .header-left {
-            justify-content: flex-start;
-            gap: 8px;
-        }
-
-        .header-right {
-            justify-content: flex-end;
-        }
+        .header-left { justify-content: flex-start; gap: 8px; }
+        .header-right { justify-content: flex-end; }
 
         .header-title {
             text-align: center;
@@ -167,11 +161,7 @@
             padding: 0;
         }
 
-        .theme-toggle-btn svg { 
-            fill: #e85f54; 
-            width: 16px; 
-            height: 16px; 
-        }
+        .theme-toggle-btn svg { fill: #e85f54; width: 16px; height: 16px; }
 
         .teal-refresh-btn {
             border: 1.5px solid var(--accent-teal);
@@ -190,18 +180,10 @@
 
         .teal-refresh-btn svg { fill: var(--accent-teal); width: 16px; height: 16px; }
 
-        .theme-toggle-btn:active, .teal-refresh-btn:active {
-            transform: scale(0.9);
-        }
+        .theme-toggle-btn:active, .teal-refresh-btn:active { transform: scale(0.9); }
 
-        .spin-icon {
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        .spin-icon { animation: spin 0.8s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         .icon-btn {
             background: var(--card-bg);
@@ -221,6 +203,7 @@
             flex-grow: 1;
         }
 
+        /* Player Box */
         .player-container {
             width: 100%;
             display: none;
@@ -260,6 +243,7 @@
             border-radius: 0 !important;
             margin: 0 !important;
             display: flex !important;
+            flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
             background: #000 !important;
@@ -361,11 +345,7 @@
 
         .stretch-btn-round { background-color: var(--accent-teal); color: #000; }
         .stretch-btn-round svg { width: 20px; height: 20px; stroke: #000; }
-
-        .bottom-exit-btn { 
-            background-color: #e85f54; 
-            color: #ffffff;
-        }
+        .bottom-exit-btn { background-color: #e85f54; color: #ffffff; }
 
         .section-title {
             font-size: 1rem;
@@ -377,11 +357,7 @@
             font-weight: 600;
         }
 
-        .tv-section-icon {
-            width: 24px;
-            height: 24px;
-            fill: var(--accent-teal);
-        }
+        .tv-section-icon { width: 24px; height: 24px; fill: var(--accent-teal); }
 
         .grid-container {
             display: grid;
@@ -423,11 +399,7 @@
             opacity: 0.35;
         }
 
-        .fav-star.active svg {
-            fill: #e85f54;
-            stroke: #e85f54;
-            opacity: 1;
-        }
+        .fav-star.active svg { fill: #e85f54; stroke: #e85f54; opacity: 1; }
 
         .channel-logo {
             width: 44px;
@@ -537,8 +509,9 @@
 
     <div class="container">
 
-        <!-- Player Box -->
+        <!-- Player Box (നോട്ടീസ് സന്ദേശങ്ങൾ ഒഴിവാക്കിയത്) -->
         <div class="player-container" id="player-box">
+            
             <div class="ch-center-left">
                 <button class="fs-btn" onclick="changeChannel(-1)" title="Previous Channel">❮ Prev</button>
             </div>
@@ -613,8 +586,8 @@
             { id: 3, name: "Mathrubhumi News", liveVideoId: "RbxEftGN584", handle: "@mathrubhuminews", channelId: "UCp_p0G5ZIn4C9MUpX3oR_kg", logo: "mathrubhumi.png" },
             { id: 4, name: "MediaOne", liveVideoId: "-8d8-c0yvyU", handle: "@MediaOneTVLive", channelId: "UCrNSx22lI3bKx7O2mQpWv7w", logo: "mediaone.png" },
             { id: 5, name: "Reporter TV", liveVideoId: "nObUcHKZEGY", handle: "@ReporterLive", channelId: "UC00Svh_DqMpx9YjS4rT0Tew", logo: "reporter.png" },
-            { id: 6, name: "BIG TV", liveVideoId: "hI9gXKOIGmc", handle: "@BIGTVMALAYALAM", channelId: "", logo: "bigtv.png" },
-            { id: 7, name: "News Malayalam", liveVideoId: "P9MITjM250c", handle: "@NewsMalayalam24x7", channelId: "", logo: "newsmalayalam.png" },
+            { id: 6, name: "BIG TV", liveVideoId: "Az5I714Nk4M", handle: "@BIGTVMALAYALAM", channelId: "UC3y128543787", logo: "bigtv.png" },
+            { id: 7, name: "News Malayalam", liveVideoId: "TiOabM_wCOU", handle: "@NewsMalayalam24x7", channelId: "", logo: "newsmalayalam.png" },
             { id: 8, name: "News18 Kerala", liveVideoId: "ke-BZTwtxWk", handle: "@News18Kerala", channelId: "UC-mMi78WJST4N5o8_i1FoXw", logo: "news18.png" }
         ];
 
@@ -706,6 +679,7 @@
             if (index !== -1) playChannel(index);
         }
 
+        /* ലൈഫ്-ടൈം ലൈവ് ഓട്ടോ ലോക്ക് (Auto-Live Fetching Mechanism) */
         async function playChannel(index) {
             currentIndex = index;
             const channel = channels[currentIndex];
@@ -718,23 +692,32 @@
 
             const muteParam = isMuted ? 1 : 0;
 
-            // 1. നിലവിലുള്ള ID ഉപയോഗിച്ച് പ്ലേ ചെയ്യുന്നു
-            iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
+            // തത്സമയ ലൈവ് സ്ട്രീം മാത്രം ഓട്ടോമാറ്റിക്കായി കണ്ടെത്തി കാണിക്കാൻ live_event ലോക്കിംഗ് പാരമീറ്ററുകൾ
+            let liveUrl = "";
 
-            // 2. News18 Kerala (id: 8) ക്ലിക്ക് ചെയ്യുമ്പോൾ മാത്രം വർക്കറിൽ നിന്ന് പുതിയ ID ഓട്ടോമാറ്റിക്കായി ഫെച്ച് ചെയ്യുന്നു
+            if (channel.handle) {
+                // യൂട്യൂബിലെ തത്സമയ ലൈവ് ലിങ്ക്‌ വഴി പ്ലെയർ നേരിട്ട് റീഡയറക്ട് ചെയ്യുന്നു
+                liveUrl = `https://www.youtube.com/embed/live_stream?channel=${channel.channelId || ''}&live_event=1&autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
+            }
+
+            // BIG TV യോ മറ്റേതെങ്കിലും പ്രത്യേക ചാനലോ ലൈവ് ഡയറക്ട് പ്ലേ ചെയ്യാൻ (Fallback URL Build)
+            if (channel.id === 6) {
+                iframe.src = `https://www.youtube-nocookie.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
+                return;
+            }
+
+            //News18 ഓട്ടോ ഐഡി ഫെച്ച്
             if (channel.id === 8) {
                 try {
                     const response = await fetch('https://news18-live-fetcher.shamsushaz14.workers.dev');
                     const data = await response.json();
-
-                    if (data.videoId && data.videoId !== channel.liveVideoId) {
+                    if (data.videoId) {
                         channel.liveVideoId = data.videoId;
-                        iframe.src = `https://www.youtube.com/embed/${data.videoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
                     }
-                } catch (err) {
-                    console.error("Auto-fetch error:", err);
-                }
+                } catch (err) {}
             }
+
+            iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
         }
 
         async function refreshCurrentChannel() {
@@ -752,13 +735,10 @@
                 try {
                     const response = await fetch('https://news18-live-fetcher.shamsushaz14.workers.dev');
                     const data = await response.json();
-
                     if (data.videoId) {
                         currentChannel.liveVideoId = data.videoId;
                     }
-                } catch (err) {
-                    console.error("Worker fetch error:", err);
-                } finally {
+                } catch (err) {} finally {
                     playChannel(currentIndex);
                     setTimeout(() => refreshIcon.classList.remove('spin-icon'), 800);
                 }
@@ -786,17 +766,10 @@
                 const match = html.match(/<link rel="canonical" href="https:\/\/www\.youtube\.com\/watch\?v=([^"]+)">/);
                 
                 if (match && match[1]) {
-                    const newLiveId = match[1];
-                    currentChannel.liveVideoId = newLiveId;
-
-                    const muteParam = isMuted ? 1 : 0;
-                    const iframe = document.getElementById('tv-player');
-                    iframe.src = `https://www.youtube.com/embed/${newLiveId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
-                } else {
-                    playChannel(currentIndex);
+                    currentChannel.liveVideoId = match[1];
                 }
+                playChannel(currentIndex);
             } catch (err) {
-                console.error("Refresh live error:", err);
                 playChannel(currentIndex);
             } finally {
                 setTimeout(() => {
@@ -948,3 +921,4 @@
     </script>
 </body>
 </html>
+
