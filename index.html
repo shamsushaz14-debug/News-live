@@ -509,7 +509,7 @@
 
     <div class="container">
 
-        <!-- Player Box (നോട്ടീസ് സന്ദേശങ്ങൾ ഒഴിവാക്കിയത്) -->
+        <!-- Player Box -->
         <div class="player-container" id="player-box">
             
             <div class="ch-center-left">
@@ -587,7 +587,7 @@
             { id: 4, name: "MediaOne", liveVideoId: "-8d8-c0yvyU", handle: "@MediaOneTVLive", channelId: "UCrNSx22lI3bKx7O2mQpWv7w", logo: "mediaone.png" },
             { id: 5, name: "Reporter TV", liveVideoId: "nObUcHKZEGY", handle: "@ReporterLive", channelId: "UC00Svh_DqMpx9YjS4rT0Tew", logo: "reporter.png" },
             { id: 6, name: "BIG TV", liveVideoId: "Az5I714Nk4M", handle: "@BIGTVMALAYALAM", channelId: "UC3y128543787", logo: "bigtv.png" },
-            { id: 7, name: "News Malayalam", liveVideoId: "TiOabM_wCOU", handle: "@NewsMalayalam24x7", channelId: "", logo: "newsmalayalam.png" },
+            { id: 7, name: "News Malayalam", liveVideoId: "K91rifR3BA0", handle: "@NewsMalayalam24x7", channelId: "", logo: "newsmalayalam.png" },
             { id: 8, name: "News18 Kerala", liveVideoId: "ke-BZTwtxWk", handle: "@News18Kerala", channelId: "UC-mMi78WJST4N5o8_i1FoXw", logo: "news18.png" }
         ];
 
@@ -692,16 +692,7 @@
 
             const muteParam = isMuted ? 1 : 0;
 
-            // തത്സമയ ലൈവ് സ്ട്രീം മാത്രം ഓട്ടോമാറ്റിക്കായി കണ്ടെത്തി കാണിക്കാൻ live_event ലോക്കിംഗ് പാരമീറ്ററുകൾ
-            let liveUrl = "";
-
-            if (channel.handle) {
-                // യൂട്യൂബിലെ തത്സമയ ലൈവ് ലിങ്ക്‌ വഴി പ്ലെയർ നേരിട്ട് റീഡയറക്ട് ചെയ്യുന്നു
-                liveUrl = `https://www.youtube.com/embed/live_stream?channel=${channel.channelId || ''}&live_event=1&autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
-            }
-
-            // BIG TV യോ മറ്റേതെങ്കിലും പ്രത്യേക ചാനലോ ലൈവ് ഡയറക്ട് പ്ലേ ചെയ്യാൻ (Fallback URL Build)
-            if (channel.id === 6) {
+            if (channel.id === 6 || channel.id === 7) {
                 iframe.src = `https://www.youtube-nocookie.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
                 return;
             }
@@ -921,4 +912,3 @@
     </script>
 </body>
 </html>
-
