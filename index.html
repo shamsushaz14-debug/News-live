@@ -475,6 +475,23 @@
             color: var(--subtext-color);
             text-align: center;
         }
+
+        /* Swipe Overlay: സ്വൈപ്പ് മനസ്സിലാക്കാൻ iframe-ന് മുകളിൽ വരുന്ന സുതാര്യമായ ലെയർ */
+        .swipe-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2147483646; 
+            background: transparent;
+        }
+
+        /* ഫുൾ സ്ക്രീൻ മോഡിൽ എത്തുമ്പോൾ മാത്രം ഓവർലേ കാണിക്കാൻ */
+        .player-container.fullscreen-mode .swipe-overlay {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -512,6 +529,9 @@
         <!-- Player Box -->
         <div class="player-container" id="player-box">
             
+            <!-- ഫുൾ സ്ക്രീനിൽ ടച്ച് മനസ്സിലാക്കാനുള്ള ഇൻവിസിബിൾ ലെയർ -->
+            <div class="swipe-overlay" id="swipe-overlay"></div>
+
             <div class="ch-center-left">
                 <button class="fs-btn" onclick="changeChannel(-1)" title="Previous Channel">❮ Prev</button>
             </div>
@@ -937,6 +957,44 @@
                 }
             } catch (e) {}
         }
+
+        // --- Swipe to Change Channel Logic ---
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchEndX = 0;
+        let touchEndY = 0;
+        const swipeThreshold = 50; 
+
+        function handleGesture() {
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+
+            if (Math.abs(diffX) > Math.abs(diffY)) {
+                if (Math.abs(diffX) > swipeThreshold) {
+                    if (diffX < 0) {
+                        // ഇടത്തേക്ക് സ്വൈപ്പ് ചെയ്താൽ (അടുത്ത ചാനലിലേക്ക് പോകാൻ)
+                        changeChannel(1);
+                    } else {
+                        // വലത്തേക്ക് സ്വൈപ്പ് ചെയ്താൽ (മുൻപത്തെ ചാനലിലേക്ക് പോകാൻ)
+                        changeChannel(-1);
+                    }
+                }
+            }
+        }
+
+        const playerBoxElem = document.getElementById('player-box');
+
+        playerBoxElem.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        playerBoxElem.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            touchEndY = e.changedTouches[0].screenY;
+            handleGesture();
+        }, { passive: true });
+        // -------------------------------------
 
         window.onload = function() {
             buildGrid();
