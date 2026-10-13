@@ -2,7 +2,7 @@
 <html lang="ml">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <!-- PWA & Mobile Optimization -->
     <meta name="mobile-web-app-capable" content="yes">
@@ -24,7 +24,6 @@
             --subtext-color: #aaa;
             --header-bg: #1e1e1e;
             --border-color: #e85f54;
-            --accent-teal: #00b2a9;
             --primary-coral: #e85f54;
         }
 
@@ -54,6 +53,10 @@
             min-height: 100vh;
             align-items: center;
             user-select: none;
+            padding-top: env(safe-area-inset-top);
+            padding-right: env(safe-area-inset-right);
+            padding-left: env(safe-area-inset-left);
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
         header {
@@ -164,8 +167,8 @@
         .theme-toggle-btn svg { fill: #e85f54; width: 16px; height: 16px; }
 
         .teal-refresh-btn {
-            border: 1.5px solid var(--accent-teal);
-            background: rgba(0, 178, 169, 0.08);
+            border: 1.5px solid var(--subtext-color);
+            background: transparent;
             width: 32px;
             height: 32px;
             border-radius: 50%;
@@ -178,7 +181,7 @@
             padding: 0;
         }
 
-        .teal-refresh-btn svg { fill: var(--accent-teal); width: 16px; height: 16px; }
+        .teal-refresh-btn svg { fill: var(--text-color); width: 16px; height: 16px; }
 
         .theme-toggle-btn:active, .teal-refresh-btn:active { transform: scale(0.9); }
 
@@ -237,6 +240,8 @@
             position: fixed !important;
             top: 0 !important;
             left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
             width: 100vw !important;
             height: 100vh !important;
             z-index: 999999 !important;
@@ -265,27 +270,114 @@
         .player-container.fullscreen-mode.ratio-stretch .video-wrapper {
             width: 100vw !important;
             height: 100vh !important;
-            max-height: 100vh !important;
             max-width: 100vw !important;
-            transform: translate(-50%, -50%) scale(1.25) !important;
+            max-height: 100vh !important;
+            transform: translate(-50%, -50%) !important;
+            overflow: hidden !important;
+        }
+
+        .player-container.fullscreen-mode.ratio-stretch .video-wrapper iframe {
+            width: 100vw !important;
+            height: 56.25vw !important; 
+            min-height: 100vh !important;
+            min-width: 177.77vh !important; 
+            position: absolute !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+        }
+
+        /* Center Tap to Unmute Notification */
+        .center-unmute-toast {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 1rem;
+            font-weight: 600;
+            z-index: 2147483647;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            pointer-events: none;
+            animation: pulse-toast 2s infinite;
+        }
+
+        @keyframes pulse-toast {
+            0% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.05); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        /* Swipe Hint Animation */
+        .swipe-hint-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 2147483647;
+            pointer-events: none;
+            background: rgba(0, 0, 0, 0.65);
+            padding: 15px 25px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            gap: 8px;
+            animation: double-swipe-hint 9s ease-in-out forwards;
+        }
+
+        @keyframes double-swipe-hint {
+            0%   { opacity: 0; }
+            5%   { opacity: 1; }
+            28%  { opacity: 1; }
+            33%  { opacity: 0; }
+            66%  { opacity: 0; }
+            71%  { opacity: 1; }
+            94%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .swipe-hand-icon {
+            width: 36px;
+            height: 36px;
+            fill: white;
+            animation: hand-swipe-motion 1.5s infinite ease-in-out;
+        }
+
+        @keyframes hand-swipe-motion {
+            0% { transform: translateX(20px) rotate(5deg); opacity: 0; }
+            30% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { transform: translateX(-20px) rotate(-10deg); opacity: 0; }
         }
 
         /* Swipe Overlay */
         .swipe-overlay {
-            display: none;
+            display: block; 
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 2147483646; 
+            z-index: 10; 
             background: transparent;
         }
 
-        .player-container.fullscreen-mode .swipe-overlay {
-            display: block;
-        }
-
+        /* Fixed Positions with max() to prevent clipping */
         .ch-center-left, .ch-center-right {
             position: absolute;
             top: 50%;
@@ -294,8 +386,8 @@
             display: none;
         }
 
-        .ch-center-left { left: 15px; }
-        .ch-center-right { right: 15px; }
+        .ch-center-left { left: max(25px, env(safe-area-inset-left)); }
+        .ch-center-right { right: max(25px, env(safe-area-inset-right)); }
 
         .player-container.fullscreen-mode .ch-center-left,
         .player-container.fullscreen-mode .ch-center-right {
@@ -304,13 +396,13 @@
 
         .bottom-left-controls, .bottom-right-group {
             position: absolute;
-            bottom: 20px;
+            bottom: max(25px, env(safe-area-inset-bottom));
             z-index: 2147483647;
             display: none;
         }
 
-        .bottom-left-controls { left: 20px; }
-        .bottom-right-group { right: 20px; gap: 10px; }
+        .bottom-left-controls { left: max(25px, env(safe-area-inset-left)); }
+        .bottom-right-group { right: max(25px, env(safe-area-inset-right)); gap: 12px; }
 
         .player-container.fullscreen-mode .bottom-left-controls,
         .player-container.fullscreen-mode .bottom-right-group {
@@ -318,6 +410,7 @@
             align-items: center;
         }
 
+        /* Button Adjustments */
         .fs-btn {
             background-color: rgba(0, 0, 0, 0.75);
             color: white;
@@ -330,61 +423,64 @@
             backdrop-filter: blur(4px);
         }
 
-        /* Arrow buttons for fullscreen */
         .fs-btn.arrow-btn {
-            width: 48px;
-            height: 48px;
+            width: 42px;
+            height: 42px;
             padding: 0;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(255, 255, 255, 0.75); /* കൂടുതൽ വ്യക്തമായ ബോർഡർ */
-            background-color: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.75); 
+            background-color: rgba(0, 0, 0, 0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
-        .fs-btn.arrow-btn svg {
-            width: 24px;
-            height: 24px;
-        }
+        .fs-btn.arrow-btn svg { width: 20px; height: 20px; }
 
         .fs-btn.mute-btn {
-            background-color: var(--accent-teal);
-            border: none;
-            width: 44px;
-            height: 44px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.75);
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
-
-        .fs-btn.mute-btn svg { width: 22px; height: 22px; fill: #000; }
+        .fs-btn.mute-btn svg { width: 20px; height: 20px; fill: #ffffff; }
 
         .round-action-btn {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             border-radius: 50%;
-            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             font-weight: bold;
             cursor: pointer;
             backdrop-filter: blur(4px);
             border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
 
-        .stretch-btn-round { background-color: var(--accent-teal); color: #000; }
-        .stretch-btn-round svg { width: 20px; height: 20px; stroke: #000; }
+        .stretch-btn-round { 
+            background-color: rgba(0, 0, 0, 0.4); 
+            color: #ffffff; 
+            border: 2px solid rgba(255, 255, 255, 0.75);
+        }
+        .stretch-btn-round svg { width: 18px; height: 18px; stroke: #ffffff; }
+        
         .bottom-exit-btn { background-color: #e85f54; color: #ffffff; }
 
         /* Fullscreen Channel List */
         .fs-channel-list {
             display: none;
             position: absolute;
-            bottom: 12px; 
+            bottom: max(15px, env(safe-area-inset-bottom)); 
             left: 50%;
             transform: translateX(-50%);
             gap: 12px;
@@ -398,7 +494,7 @@
             background: rgba(0, 0, 0, 0.6);
             border-radius: 30px;
             backdrop-filter: blur(5px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
         }
 
         .player-container.fullscreen-mode .fs-channel-list {
@@ -423,13 +519,8 @@
             transition: transform 0.2s;
         }
 
-        .fs-channel-icon:active {
-            transform: scale(0.9);
-        }
-
-        .fs-channel-icon.active-ch {
-            border-color: #e85f54;
-        }
+        .fs-channel-icon:active { transform: scale(0.9); }
+        .fs-channel-icon.active-ch { border-color: #e85f54; }
 
         .section-title {
             font-size: 1rem;
@@ -441,7 +532,7 @@
             font-weight: 600;
         }
 
-        .tv-section-icon { width: 24px; height: 24px; fill: var(--accent-teal); }
+        .tv-section-icon { width: 24px; height: 24px; fill: var(--text-color); }
 
         .grid-container {
             display: grid;
@@ -503,6 +594,7 @@
             text-align: center;
         }
 
+        /* Nav Bar adjustments for modern buttons */
         .nav-bar {
             display: flex;
             justify-content: space-between;
@@ -520,36 +612,65 @@
             background-color: #e85f54;
             color: white;
             border: none;
-            padding: 10px 12px;
+            padding: 10px 8px;
             border-radius: 20px;
-            font-weight: bold;
+            font-weight: 600;
             font-size: 0.8rem;
             cursor: pointer;
             flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(232, 95, 84, 0.3);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 5px rgba(232, 95, 84, 0.3);
+        }
+
+        .nav-btn svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
         }
 
         .fullscreen-btn { 
-            background-color: var(--accent-teal); 
-            color: #000;
-            border: none;
-            padding: 10px 12px;
+            background-color: transparent; 
+            color: var(--text-color);
+            border: 1.5px solid var(--text-color);
+            padding: 10px 8px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 0.8rem;
             cursor: pointer;
             flex: 1.2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
         .smart-exit-btn { 
             background-color: transparent; 
             color: #e85f54; 
             border: 1.5px solid #e85f54; 
-            padding: 10px 12px;
+            padding: 10px 8px;
             border-radius: 20px;
             font-weight: bold;
             font-size: 0.8rem;
             cursor: pointer;
             flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
         footer {
@@ -596,15 +717,27 @@
         <!-- Player Box -->
         <div class="player-container" id="player-box">
             
+            <!-- Tap to Unmute Notification -->
+            <div class="center-unmute-toast" id="center-unmute-toast" style="display:none;">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                Tap to Unmute
+            </div>
+
+            <!-- Swipe Hint Notification -->
+            <div class="swipe-hint-container" id="swipe-hint-overlay">
+                <svg class="swipe-hand-icon" viewBox="0 0 24 24">
+                   <path d="M9 11.24V7.5a2.5 2.5 0 0 1 5 0v.46c.32-.27.74-.46 1.2-.46a2.5 2.5 0 0 1 2.5 2.5v.38c.32-.24.73-.38 1.15-.38a2.5 2.5 0 0 1 2.5 2.5v4.5A7.5 7.5 0 0 1 13.85 24h-1.7A7.5 7.5 0 0 1 4.65 16.5v-1.12a.85.85 0 0 1 .16-.51l2.5-3.33A2.5 2.5 0 0 1 9 11.24z"/>
+                </svg>
+                <span>Swipe to change channels</span>
+            </div>
+
             <div class="ch-center-left">
-                <!-- Double Arrow Left -->
                 <button class="fs-btn arrow-btn" onclick="changeChannel(-1)" title="Previous Channel">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17L6 12L11 7M18 17L13 12L18 7"/></svg>
                 </button>
             </div>
 
             <div class="ch-center-right">
-                <!-- Double Arrow Right -->
                 <button class="fs-btn arrow-btn" onclick="changeChannel(1)" title="Next Channel">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17L18 12L13 7M6 17L11 12L6 7"/></svg>
                 </button>
@@ -612,9 +745,7 @@
 
             <div class="bottom-left-controls">
                 <button class="fs-btn mute-btn" id="side-mute-btn" onclick="toggleMute()" title="Mute/Unmute">
-                    <svg id="mute-svg-icon" viewBox="0 0 24 24">
-                        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-                    </svg>
+                    <svg id="mute-svg-icon" viewBox="0 0 24 24"></svg>
                 </button>
             </div>
 
@@ -633,10 +764,7 @@
                 </iframe>
             </div>
 
-            <!-- ഫുൾ സ്ക്രീനിൽ ടച്ച് മനസ്സിലാക്കാനുള്ള ഇൻവിസിബിൾ ലെയർ -->
             <div class="swipe-overlay" id="swipe-overlay"></div>
-            
-            <!-- ഫുൾ സ്ക്രീനിലെ റൗണ്ട് ചാനൽ ഐക്കണുകൾ -->
             <div class="fs-channel-list" id="fs-channel-list"></div>
         </div>
 
@@ -656,9 +784,17 @@
         <div class="grid-container" id="grid-container"></div>
 
         <div class="nav-bar">
-            <button class="nav-btn" onclick="changeChannel(-1)">❮ Prev</button>
+            <!-- Modernized Prev Button -->
+            <button class="nav-btn" onclick="changeChannel(-1)">
+                <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>
+                Prev
+            </button>
             <button class="fullscreen-btn" onclick="requestFullScreen()" title="Full Screen">⛶ Full Screen</button>
-            <button class="nav-btn" onclick="changeChannel(1)">Next ❯</button>
+            <!-- Modernized Next Button -->
+            <button class="nav-btn" onclick="changeChannel(1)">
+                Next
+                <svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
             <button class="smart-exit-btn" onclick="handleSmartExit()">✕ Exit</button>
         </div>
 
@@ -682,41 +818,37 @@
             { id: 3, name: "Mathrubhumi News", liveVideoId: "RbxEftGN584", handle: "@mathrubhuminews", channelId: "UCp_p0G5ZIn4C9MUpX3oR_kg", logo: "mathrubhumi.png" },
             { id: 4, name: "MediaOne", liveVideoId: "-8d8-c0yvyU", handle: "@MediaOneTVLive", channelId: "UCrNSx22lI3bKx7O2mQpWv7w", logo: "mediaone.png" },
             { id: 5, name: "Reporter TV", liveVideoId: "nObUcHKZEGY", handle: "@ReporterLive", channelId: "UC00Svh_DqMpx9YjS4rT0Tew", logo: "reporter.png" },
-            { id: 6, name: "BIG TV", liveVideoId: "Az5I714Nk4M", handle: "@BIGTVMALAYALAM", channelId: "UC3y128543787", logo: "bigtv.png" },
+            { id: 6, name: "BIG TV", liveVideoId: "72ngeza9aKA", handle: "@BIGTVMALAYALAM", channelId: "", logo: "bigtv.png" },
             { id: 7, name: "News Malayalam", liveVideoId: "K91rifR3BA0", handle: "@NewsMalayalam24x7", channelId: "", logo: "newsmalayalam.png" },
             { id: 8, name: "News18 Kerala", liveVideoId: "ke-BZTwtxWk", handle: "@News18Kerala", channelId: "UC-mMi78WJST4N5o8_i1FoXw", logo: "news18.png" }
         ];
 
         let currentIndex = -1;
-        let isMuted = false;
+        let isMuted = true;
         let isStretchMode = false;
         let favorites = JSON.parse(localStorage.getItem('news_tv_favs')) || [];
         let deferredPrompt = null;
         let wakeLock = null;
         let fsChannelTimer;
+        
+        let hasShownSwipeHint = false; 
 
-        // സ്ക്രീൻ ഓഫ് ആകാതിരിക്കാനുള്ള വേക്ക് ലോക്ക് ഫംഗ്ഷൻ
         async function requestWakeLock() {
             try {
                 if ('wakeLock' in navigator && !wakeLock) {
                     wakeLock = await navigator.wakeLock.request('screen');
-                    wakeLock.addEventListener('release', () => {
-                        wakeLock = null;
-                    });
+                    wakeLock.addEventListener('release', () => { wakeLock = null; });
                 }
             } catch (err) {}
         }
 
         async function releaseWakeLock() {
             if (wakeLock !== null) {
-                try {
-                    await wakeLock.release();
-                } catch (e) {}
+                try { await wakeLock.release(); } catch (e) {}
                 wakeLock = null;
             }
         }
 
-        // ടാബ് മാറുമ്പോഴോ ബാക്ക്ഗ്രൗണ്ടിൽ പോകുമ്പോഴോ ഉള്ള കൈകാര്യം ചെയ്യൽ
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible' && currentIndex !== -1) {
                 requestWakeLock();
@@ -844,7 +976,6 @@
             if (index !== -1) playChannel(index);
         }
 
-        /* ലൈഫ്-ടൈം ലൈവ് ഓട്ടോ ലോക്ക് (Auto-Live Fetching Mechanism) */
         async function playChannel(index) {
             currentIndex = index;
             const channel = channels[currentIndex];
@@ -855,29 +986,32 @@
                 playerBox.style.display = "block";
             }
 
-            // പ്ലേ ചെയ്യുമ്പോൾ സ്ക്രീൻ ഓഫ് ആകാതിരിക്കാൻ വേക്ക് ലോക്ക് ഓൺ ചെയ്യുന്നു
             requestWakeLock();
             updateFsActiveIcon();
+            
+            const unmuteToast = document.getElementById('center-unmute-toast');
+            if (isMuted && unmuteToast) {
+                unmuteToast.style.display = 'flex';
+            } else if (!isMuted && unmuteToast) {
+                unmuteToast.style.display = 'none';
+            }
 
             const muteParam = isMuted ? 1 : 0;
 
             if (channel.id === 6 || channel.id === 7) {
                 iframe.src = `https://www.youtube-nocookie.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
-                return;
             }
-
-            //News18 ഓട്ടോ ഐഡി ഫെച്ച്
-            if (channel.id === 8) {
+            else if (channel.id === 8) {
                 try {
                     const response = await fetch('https://news18-live-fetcher.shamsushaz14.workers.dev');
                     const data = await response.json();
-                    if (data.videoId) {
-                        channel.liveVideoId = data.videoId;
-                    }
+                    if (data.videoId) channel.liveVideoId = data.videoId;
                 } catch (err) {}
+                iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
+            } 
+            else {
+                iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
             }
-
-            iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
         }
 
         async function refreshCurrentChannel() {
@@ -951,7 +1085,7 @@
                 iframe.src = "";
                 playerBox.style.display = "none";
                 currentIndex = -1;
-                releaseWakeLock(); // പ്ലെയർ ക്ലോസ് ചെയ്യുമ്പോൾ വേക്ക് ലോക്ക് റിലീസ് ചെയ്യുന്നു
+                releaseWakeLock(); 
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 return;
             }
@@ -983,15 +1117,39 @@
             isMuted = !isMuted;
             const muteSvgIcon = document.getElementById('mute-svg-icon');
             const iframe = document.getElementById('tv-player');
+            const unmuteToast = document.getElementById('center-unmute-toast');
 
             muteSvgIcon.innerHTML = isMuted ? svgMuted : svgUnmuted;
+            
+            if (!isMuted && unmuteToast) {
+                unmuteToast.style.display = 'none'; 
+                
+                if (!hasShownSwipeHint) {
+                    hasShownSwipeHint = true;
+                    setTimeout(() => {
+                        const swipeHintOverlay = document.getElementById('swipe-hint-overlay');
+                        if (swipeHintOverlay) {
+                            swipeHintOverlay.style.display = 'flex';
+                            
+                            setTimeout(() => {
+                                swipeHintOverlay.style.display = 'none';
+                            }, 9000); 
+                        }
+                    }, 3000); 
+                }
+
+            } else if (isMuted && unmuteToast) {
+                unmuteToast.style.display = 'flex';
+            }
 
             const command = isMuted ? 'mute' : 'unMute';
-            iframe.contentWindow.postMessage(JSON.stringify({
-                'event': 'command',
-                'func': command,
-                'args': []
-            }), '*');
+            if(iframe.contentWindow) {
+                iframe.contentWindow.postMessage(JSON.stringify({
+                    'event': 'command',
+                    'func': command,
+                    'args': []
+                }), '*');
+            }
         }
 
         function toggleStretchRatio() {
@@ -1075,7 +1233,6 @@
             } catch (e) {}
         }
 
-        // Swipe Gesture Variables and Functions
         let touchStartX = 0;
         let touchStartY = 0;
         let touchEndX = 0;
@@ -1086,20 +1243,27 @@
             const diffX = touchEndX - touchStartX;
             const diffY = touchEndY - touchStartY;
 
-            // സ്ക്രീനിൽ തൊടുമ്പോൾ (Tap Detection) ചാനലുകൾ ഷോ ചെയ്യാൻ
+            // സ്ക്രീനിൽ ടാപ്പ് ചെയ്താൽ
             if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
-                showFsChannels();
+                const playerBox = document.getElementById('player-box');
+                
+                if (isMuted) {
+                    toggleMute();
+                } else if (!playerBox.classList.contains('fullscreen-mode')) {
+                    toggleMute();
+                }
+
+                if (playerBox.classList.contains('fullscreen-mode')) {
+                    showFsChannels();
+                }
                 return;
             }
 
-            // മുകളിലേക്കും താഴേക്കുമുള്ള സ്വൈപ്പിനെക്കാൾ കൂടുതൽ വശങ്ങളിലേക്കാണെങ്കിൽ മാത്രം പരിഗണിക്കുക
             if (Math.abs(diffX) > Math.abs(diffY)) {
                 if (Math.abs(diffX) > swipeThreshold) {
                     if (diffX < 0) {
-                        // ഇടത്തേക്ക് സ്വൈപ്പ് ചെയ്താൽ (അടുത്ത ചാനൽ)
                         changeChannel(1);
                     } else {
-                        // വലത്തേക്ക് സ്വൈപ്പ് ചെയ്താൽ (മുൻപത്തെ ചാനൽ)
                         changeChannel(-1);
                     }
                 }
@@ -1107,11 +1271,12 @@
         }
 
         window.onload = function() {
+            document.getElementById('mute-svg-icon').innerHTML = svgMuted;
+            
             buildGrid();
             buildFsChannelList();
             playChannel(0);
 
-            // Swipe Overlay Event Listeners
             const swipeOverlay = document.getElementById('swipe-overlay');
             if (swipeOverlay) {
                 swipeOverlay.addEventListener('touchstart', (e) => {
