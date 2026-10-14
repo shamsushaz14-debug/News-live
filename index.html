@@ -15,6 +15,11 @@
     
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2989/2989932.png" type="image/png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2989/2989932.png">
+    
+    <!-- Montserrat ExtraBold Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -23,8 +28,9 @@
             --text-color: #ffffff;
             --subtext-color: #aaa;
             --header-bg: #1e1e1e;
-            --border-color: #e85f54;
-            --primary-coral: #e85f54;
+            --border-color: #069494;
+            --primary-teal: #069494;
+            --live-red: #e85f54;
         }
 
         .light-mode {
@@ -33,7 +39,7 @@
             --text-color: #2f3640;
             --subtext-color: #718093;
             --header-bg: #ffffff;
-            --border-color: #e85f54;
+            --border-color: #069494;
         }
 
         * {
@@ -92,7 +98,7 @@
 
         .live-badge {
             background-color: transparent;
-            color: var(--primary-coral);
+            color: var(--live-red);
             font-size: 0.65rem;
             font-weight: 800;
             padding: 2px 8px;
@@ -112,15 +118,20 @@
         }
 
         .header-title h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
             font-size: 1.35rem;
-            color: #e85f54;
+            color: var(--text-color);
             margin: 0;
             line-height: 1.1;
+            letter-spacing: -0.5px;
         }
 
         .header-title h1 .tv-text {
-            font-size: 0.85em;
-            color: #e85f54;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 1em;
+            color: var(--primary-teal);
         }
 
         .scroll-container {
@@ -150,7 +161,7 @@
 
         .theme-toggle-btn {
             background: rgba(255, 255, 255, 0.05);
-            border: 1.5px solid #e85f54;
+            border: 1.5px solid var(--primary-teal);
             color: var(--text-color);
             width: 32px;
             height: 32px;
@@ -164,10 +175,10 @@
             padding: 0;
         }
 
-        .theme-toggle-btn svg { fill: #e85f54; width: 16px; height: 16px; }
+        .theme-toggle-btn svg { fill: var(--text-color); width: 16px; height: 16px; }
 
         .teal-refresh-btn {
-            border: 1.5px solid var(--subtext-color);
+            border: 1.5px solid var(--primary-teal);
             background: transparent;
             width: 32px;
             height: 32px;
@@ -216,7 +227,7 @@
             background: #000;
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            border: 1px solid var(--border-color);
+            border: 1.5px solid var(--border-color);
         }
 
         .video-wrapper {
@@ -474,7 +485,7 @@
         }
         .stretch-btn-round svg { width: 18px; height: 18px; stroke: #ffffff; }
         
-        .bottom-exit-btn { background-color: #e85f54; color: #ffffff; }
+        .bottom-exit-btn { background-color: var(--primary-teal); color: #ffffff; }
 
         /* Fullscreen Channel List */
         .fs-channel-list {
@@ -520,7 +531,7 @@
         }
 
         .fs-channel-icon:active { transform: scale(0.9); }
-        .fs-channel-icon.active-ch { border-color: #e85f54; }
+        .fs-channel-icon.active-ch { border-color: var(--primary-teal); }
 
         .section-title {
             font-size: 1rem;
@@ -533,6 +544,25 @@
         }
 
         .tv-section-icon { width: 24px; height: 24px; fill: var(--text-color); }
+
+        .live-clock {
+            margin-left: auto;
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--text-color);
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: baseline;
+            gap: 3px;
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .ampm-transparent {
+            background: transparent;
+            color: var(--subtext-color);
+            font-size: 0.75em;
+            font-weight: 600;
+        }
 
         .grid-container {
             display: grid;
@@ -548,7 +578,7 @@
             align-items: center;
             justify-content: center;
             padding: 12px 6px;
-            border: 1px solid var(--border-color);
+            border: 1.5px solid var(--border-color);
             cursor: pointer;
             position: relative;
         }
@@ -574,7 +604,7 @@
             opacity: 0.35;
         }
 
-        .fav-star.active svg { fill: #e85f54; stroke: #e85f54; opacity: 1; }
+        .fav-star.active svg { fill: var(--primary-teal); stroke: var(--primary-teal); opacity: 1; }
 
         .channel-logo {
             width: 44px;
@@ -584,7 +614,7 @@
             margin-bottom: 6px;
             background-color: #ffffff;
             padding: 2px;
-            border: 1px solid var(--border-color);
+            border: 1.5px solid var(--border-color);
         }
 
         .card span {
@@ -605,11 +635,11 @@
             gap: 8px;
             background-color: var(--card-bg);
             border-radius: 18px;
-            border: 1px solid var(--border-color);
+            border: 1.5px solid var(--border-color);
         }
 
         .nav-btn {
-            background-color: #e85f54;
+            background-color: var(--primary-teal);
             color: white;
             border: none;
             padding: 10px 8px;
@@ -622,13 +652,13 @@
             align-items: center;
             justify-content: center;
             gap: 6px;
-            box-shadow: 0 4px 10px rgba(232, 95, 84, 0.3);
+            box-shadow: 0 4px 10px rgba(6, 148, 148, 0.3);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .nav-btn:active {
             transform: scale(0.95);
-            box-shadow: 0 2px 5px rgba(232, 95, 84, 0.3);
+            box-shadow: 0 2px 5px rgba(6, 148, 148, 0.3);
         }
 
         .nav-btn svg {
@@ -659,8 +689,8 @@
 
         .smart-exit-btn { 
             background-color: transparent; 
-            color: #e85f54; 
-            border: 1.5px solid #e85f54; 
+            color: var(--primary-teal); 
+            border: 1.5px solid var(--primary-teal); 
             padding: 10px 8px;
             border-radius: 20px;
             font-weight: bold;
@@ -696,7 +726,7 @@
 
         <div class="header-title">
             <span class="live-badge">🔴 LIVE</span>
-            <h1>News <span class="tv-text">TV</span></h1>
+            <h1>News<span class="tv-text">TV</span></h1>
             <div class="scroll-container">
                 <span class="scroll-text">Developed by Shamsu Shaz © 2026</span>
                 <span class="scroll-text" aria-hidden="true">Developed by Shamsu Shaz © 2026</span>
@@ -779,7 +809,8 @@
             <svg class="tv-section-icon" viewBox="0 0 24 24">
                 <path d="M2 3h20v13H2V3zm2 2v9h16V5H4zm5 12h6v2H9v-2zm-2 2h10v1.5H7V19z"/>
             </svg>
-            എല്ലാ ചാനലുകളും (All Channels)
+            <span>All Channels</span>
+            <span id="live-clock" class="live-clock"></span>
         </div>
         <div class="grid-container" id="grid-container"></div>
 
@@ -832,6 +863,38 @@
         let fsChannelTimer;
         
         let hasShownSwipeHint = false; 
+        let showTimeMode = true;
+
+        function renderClockContent() {
+            const clockEl = document.getElementById('live-clock');
+            if (!clockEl) return;
+            const now = new Date();
+            
+            if (showTimeMode) {
+                let hours = now.getHours();
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                const strHours = String(hours).padStart(2, '0');
+                clockEl.innerHTML = `${strHours}:${minutes} <span class="ampm-transparent">${ampm}</span>`;
+            } else {
+                const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+                const dayName = days[now.getDay()];
+                clockEl.innerHTML = `<span class="ampm-transparent" style="font-size: 0.9rem;">${dayName}</span>`;
+            }
+        }
+
+        function toggleClockBlink() {
+            const clockEl = document.getElementById('live-clock');
+            if (!clockEl) return;
+            clockEl.style.opacity = '0';
+            setTimeout(() => {
+                showTimeMode = !showTimeMode;
+                renderClockContent();
+                clockEl.style.opacity = '1';
+            }, 300);
+        }
 
         async function requestWakeLock() {
             try {
@@ -1010,7 +1073,7 @@
                 iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
             } 
             else {
-                iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0`;
+                iframe.src = `https://www.youtube.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&rel=0`;
             }
         }
 
@@ -1273,6 +1336,9 @@
         window.onload = function() {
             document.getElementById('mute-svg-icon').innerHTML = svgMuted;
             
+            renderClockContent();
+            setInterval(toggleClockBlink, 3000);
+
             buildGrid();
             buildFsChannelList();
             playChannel(0);
