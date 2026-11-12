@@ -17,10 +17,28 @@
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2989/2989932.png" type="image/png">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2989/2989932.png">
     
-    <!-- Montserrat ExtraBold Font -->
+    <!-- Preconnect to Fonts & Streaming CDNs -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://raw.githubusercontent.com" crossorigin>
+    <link rel="preconnect" href="https://www.youtube-nocookie.com" crossorigin>
+    <link rel="preconnect" href="https://asianet-samsung.vgcdn.net" crossorigin>
+    <link rel="preconnect" href="https://mmtvnews1.akamaized.net" crossorigin>
+    <link rel="preconnect" href="https://yuppmedtaorire.akamaized.net" crossorigin>
+    <link rel="preconnect" href="https://cdn.pishow.tv" crossorigin>
+    <link rel="preconnect" href="https://streams.tangotv.in" crossorigin>
+    <link rel="preconnect" href="https://mumt07.tangotv.in" crossorigin>
+    <link rel="preconnect" href="https://segment.yuppcdn.net" crossorigin>
+    <link rel="preconnect" href="https://stream.ottlive.co.in" crossorigin>
+    <link rel="preconnect" href="https://d2gvyg6lvauoko.cloudfront.net" crossorigin>
+    <link rel="preconnect" href="https://n18syndication.akamaized.net" crossorigin>
+    <link rel="preconnect" href="https://nw18live.cdn.jio.com" crossorigin>
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
+
+    <!-- HLS.js for Lightning-Fast Direct .m3u8 Streaming -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 
     <style>
         :root {
@@ -218,10 +236,10 @@
             flex-grow: 1;
         }
 
-        /* Player Box */
+        /* Player Box (Normal Mode - Uniform 16:9 - Shown immediately for Zero Startup Lag) */
         .player-container {
             width: 100%;
-            display: none;
+            display: block;
             margin-bottom: 15px;
             border-radius: 12px;
             overflow: hidden;
@@ -229,25 +247,162 @@
             position: relative;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
             border: 1.5px solid var(--border-color);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), border-radius 0.35s ease;
         }
 
         .video-wrapper {
             position: relative;
-            padding-bottom: 56.25%;
+            padding-bottom: 56.25%; /* Strict 16:9 Aspect Ratio */
             height: 0;
             background: #000;
             width: 100%;
+            overflow: hidden;
+            transition: opacity 0.18s cubic-bezier(0.22, 1, 0.36, 1), transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: opacity, transform;
         }
 
-        .video-wrapper iframe {
+        /* Ultra-Fast Cinematic Channel Switch Crossfade + Subtle Zoom Transition */
+        .video-wrapper.ch-switching {
+            opacity: 0.32;
+            transform: scale(0.985);
+        }
+
+        .video-wrapper.ch-switched-in {
+            animation: cinematic-pop-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes cinematic-pop-in {
+            0% { opacity: 0.4; transform: scale(1.015); filter: brightness(1.1); }
+            100% { opacity: 1; transform: scale(1); filter: brightness(1); }
+        }
+
+        .video-wrapper iframe,
+        .video-wrapper video.main-player {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             border: 0;
+            background: #000;
+            object-fit: fill;
+            transform-origin: center center;
         }
 
+        /* Hidden Preload Video Buffers */
+        .preload-video-buffer {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+            z-index: -10;
+            left: -9999px;
+            top: -9999px;
+        }
+
+        /* MediaOne Normal Mode Black-Bar Crop Fix */
+        .player-container.ch-mediaone .video-wrapper video.main-player,
+        .player-container.ch-mediaone .video-wrapper iframe {
+            transform: scale(1.04, 1.03);
+        }
+
+        /* Cinematic Channel Info OSD Banner (Top-Left) */
+        .channel-osd-banner {
+            position: absolute;
+            top: max(12px, env(safe-area-inset-top));
+            left: max(12px, env(safe-area-inset-left));
+            z-index: 2147483647;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 18, 22, 0.72);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            padding: 5px 12px 5px 6px;
+            border-radius: 30px;
+            border: 1px solid rgba(6, 148, 148, 0.55);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(-10px) scale(0.95);
+            transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1), transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .channel-osd-banner.show {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .channel-osd-logo {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #fff;
+            object-fit: cover;
+            padding: 1.5px;
+            border: 1px solid var(--primary-teal);
+        }
+
+        .channel-osd-text {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .channel-osd-name {
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .channel-osd-status {
+            color: var(--primary-teal);
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+
+        /* Ad-Shield Blackout Overlay */
+        .ad-shield-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0b0e11;
+            z-index: 25;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .ad-shield-spinner {
+            width: 34px;
+            height: 34px;
+            border: 3.5px solid rgba(6, 148, 148, 0.25);
+            border-top-color: var(--primary-teal);
+            border-radius: 50%;
+            animation: spin 0.5s linear infinite;
+        }
+
+        .ad-shield-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--primary-teal);
+            letter-spacing: 0.3px;
+        }
+
+        .ad-shield-sub {
+            font-size: 0.75rem;
+            color: #999;
+        }
+
+        /* Fullscreen Mode: Cinematic Entrance/Exit & Strict 16:9 Landscape */
         .player-container.fullscreen-mode {
             position: fixed !important;
             top: 0 !important;
@@ -265,6 +420,21 @@
             justify-content: center !important;
             background: #000 !important;
             border: none !important;
+            animation: fs-cinematic-enter 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        .player-container.fs-exiting {
+            animation: fs-cinematic-exit 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes fs-cinematic-enter {
+            0% { opacity: 0.65; transform: scale(0.96); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes fs-cinematic-exit {
+            0% { opacity: 0.85; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         .player-container.fullscreen-mode .video-wrapper {
@@ -272,31 +442,78 @@
             top: 50% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            width: 100vw !important;
-            height: 56.25vw !important; 
-            max-height: 100vh !important;
-            max-width: 177.78vh !important;
+            width: min(100vw, 177.78vh) !important;
+            height: min(56.25vw, 100vh) !important;
             padding-bottom: 0 !important;
+            overflow: hidden !important;
         }
 
+        .player-container.fullscreen-mode .video-wrapper.ch-switching {
+            opacity: 0.32 !important;
+            transform: translate(-50%, -50%) scale(0.985) !important;
+        }
+
+        .player-container.fullscreen-mode .video-wrapper iframe,
+        .player-container.fullscreen-mode .video-wrapper video.main-player {
+            width: 100% !important;
+            height: 100% !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            object-fit: fill !important;
+        }
+
+        /* MediaOne 16:9 Fullscreen Border Crop Fix */
+        .player-container.fullscreen-mode.ch-mediaone:not(.ratio-stretch) .video-wrapper video.main-player,
+        .player-container.fullscreen-mode.ch-mediaone:not(.ratio-stretch) .video-wrapper iframe {
+            transform: scale(1.04, 1.03) !important;
+        }
+
+        /* 20:9 Stretch Mode: Full Screen Edge-to-Edge Fill when Stretch Button is pressed */
         .player-container.fullscreen-mode.ratio-stretch .video-wrapper {
             width: 100vw !important;
             height: 100vh !important;
             max-width: 100vw !important;
             max-height: 100vh !important;
-            transform: translate(-50%, -50%) !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
             overflow: hidden !important;
+        }
+
+        .player-container.fullscreen-mode.ratio-stretch .video-wrapper.ch-switching {
+            opacity: 0.32 !important;
+            transform: scale(0.985) !important;
+        }
+
+        .player-container.fullscreen-mode.ratio-stretch .video-wrapper video.main-player {
+            width: 100vw !important;
+            height: 100vh !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: none !important;
+            object-fit: fill !important;
         }
 
         .player-container.fullscreen-mode.ratio-stretch .video-wrapper iframe {
             width: 100vw !important;
-            height: 56.25vw !important; 
-            min-height: 100vh !important;
-            min-width: 177.77vh !important; 
+            height: 100vh !important;
             position: absolute !important;
             top: 50% !important;
             left: 50% !important;
-            transform: translate(-50%, -50%) !important;
+            transform: translate(-50%, -50%) scaleX(1.26) !important;
+        }
+
+        /* MediaOne 20:9 Stretch Mode Special Fix */
+        .player-container.fullscreen-mode.ratio-stretch.ch-mediaone .video-wrapper video.main-player {
+            transform: scale(1.08, 1.06) !important;
+            transform-origin: center center !important;
+        }
+
+        .player-container.fullscreen-mode.ratio-stretch.ch-mediaone .video-wrapper iframe {
+            transform: translate(-50%, -50%) scale(1.34, 1.06) !important;
         }
 
         /* Center Tap to Unmute & Status Toast */
@@ -386,11 +603,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 10; 
+            z-index: 30; 
             background: transparent;
         }
 
-        /* Fixed Positions with max() to prevent clipping */
+        /* Fullscreen Controls: Always Visible, Compact & Transparent */
         .ch-center-left, .ch-center-right {
             position: absolute;
             top: 50%;
@@ -399,8 +616,8 @@
             display: none;
         }
 
-        .ch-center-left { left: max(25px, env(safe-area-inset-left)); }
-        .ch-center-right { right: max(25px, env(safe-area-inset-right)); }
+        .ch-center-left { left: max(18px, env(safe-area-inset-left)); }
+        .ch-center-right { right: max(18px, env(safe-area-inset-right)); }
 
         .player-container.fullscreen-mode .ch-center-left,
         .player-container.fullscreen-mode .ch-center-right {
@@ -409,13 +626,13 @@
 
         .bottom-left-controls, .bottom-right-group {
             position: absolute;
-            bottom: max(25px, env(safe-area-inset-bottom));
+            bottom: max(18px, env(safe-area-inset-bottom));
             z-index: 2147483647;
             display: none;
         }
 
-        .bottom-left-controls { left: max(25px, env(safe-area-inset-left)); }
-        .bottom-right-group { right: max(25px, env(safe-area-inset-right)); gap: 12px; }
+        .bottom-left-controls { left: max(18px, env(safe-area-inset-left)); }
+        .bottom-right-group { right: max(18px, env(safe-area-inset-right)); gap: 10px; }
 
         .player-container.fullscreen-mode .bottom-left-controls,
         .player-container.fullscreen-mode .bottom-right-group {
@@ -423,91 +640,107 @@
             align-items: center;
         }
 
-        /* Button Adjustments */
+        /* Compact & Transparent Fullscreen Buttons (34px) */
         .fs-btn {
-            background-color: rgba(0, 0, 0, 0.75);
+            background-color: rgba(0, 0, 0, 0.25);
             color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 10px 16px;
+            border: 1.5px solid rgba(255, 255, 255, 0.55);
+            padding: 8px 12px;
             border-radius: 20px;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             cursor: pointer;
             font-weight: bold;
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            transition: transform 0.2s ease, background-color 0.2s ease;
+        }
+
+        .fs-btn:active, .round-action-btn:active {
+            transform: scale(0.9);
         }
 
         .fs-btn.arrow-btn {
-            width: 42px;
-            height: 42px;
+            width: 34px;
+            height: 34px;
             padding: 0;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid rgba(255, 255, 255, 0.75); 
-            background-color: rgba(0, 0, 0, 0.4);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            border: 1.5px solid rgba(255, 255, 255, 0.55); 
+            background-color: rgba(0, 0, 0, 0.25);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
-        .fs-btn.arrow-btn svg { width: 20px; height: 20px; }
+        .fs-btn.arrow-btn svg { width: 16px; height: 16px; }
 
         .fs-btn.mute-btn {
-            background-color: rgba(0, 0, 0, 0.4);
-            border: 2px solid rgba(255, 255, 255, 0.75);
-            width: 42px;
-            height: 42px;
+            background-color: rgba(0, 0, 0, 0.25);
+            border: 1.5px solid rgba(255, 255, 255, 0.55);
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             backdrop-filter: blur(4px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            -webkit-backdrop-filter: blur(4px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
         }
-        .fs-btn.mute-btn svg { width: 20px; height: 20px; fill: #ffffff; }
+        .fs-btn.mute-btn svg { width: 16px; height: 16px; fill: #ffffff; }
 
         .round-action-btn {
-            width: 42px;
-            height: 42px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             font-weight: bold;
             cursor: pointer;
             backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             border: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+            transition: transform 0.2s ease;
         }
 
         .stretch-btn-round { 
-            background-color: rgba(0, 0, 0, 0.4); 
+            background-color: rgba(0, 0, 0, 0.25); 
             color: #ffffff; 
-            border: 2px solid rgba(255, 255, 255, 0.75);
+            border: 1.5px solid rgba(255, 255, 255, 0.55);
         }
-        .stretch-btn-round svg { width: 18px; height: 18px; stroke: #ffffff; }
+        .stretch-btn-round svg { width: 15px; height: 15px; stroke: #ffffff; }
         
-        .bottom-exit-btn { background-color: var(--primary-teal); color: #ffffff; }
+        /* Exit Button: Keeps Original Teal Color, Sized to Match Compact Controls */
+        .bottom-exit-btn {
+            background-color: var(--primary-teal);
+            color: #ffffff;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.55);
+        }
 
-        /* Fullscreen Channel List */
+        /* Fullscreen Channel List (Shows on Tap, Auto-Hides after 3s) */
         .fs-channel-list {
             display: none;
             position: absolute;
-            bottom: max(15px, env(safe-area-inset-bottom)); 
+            bottom: max(14px, env(safe-area-inset-bottom)); 
             left: 50%;
-            transform: translateX(-50%);
-            gap: 12px;
+            transform: translate(-50%, 10px);
+            gap: 10px;
             z-index: 2147483647;
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.3s ease;
-            max-width: calc(100vw - 220px); 
+            transition: opacity 0.3s cubic-bezier(0.22, 1, 0.36, 1), transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+            max-width: calc(100vw - 190px); 
             overflow-x: auto;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 14px;
+            background: rgba(0, 0, 0, 0.55);
             border-radius: 30px;
-            backdrop-filter: blur(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.65);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .player-container.fullscreen-mode .fs-channel-list {
@@ -517,11 +750,12 @@
         .fs-channel-list.show {
             opacity: 1;
             pointer-events: auto;
+            transform: translate(-50%, 0);
         }
 
         .fs-channel-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             object-fit: cover;
             cursor: pointer;
@@ -529,11 +763,14 @@
             flex-shrink: 0;
             background-color: #ffffff;
             padding: 2px;
-            transition: transform 0.2s;
+            transition: transform 0.2s, border-color 0.2s;
         }
 
         .fs-channel-icon:active { transform: scale(0.9); }
-        .fs-channel-icon.active-ch { border-color: var(--primary-teal); }
+        .fs-channel-icon.active-ch {
+            border-color: var(--primary-teal);
+            transform: scale(1.08);
+        }
 
         .section-title {
             font-size: 1rem;
@@ -626,7 +863,7 @@
             text-align: center;
         }
 
-        /* Nav Bar adjustments for modern buttons */
+        /* Nav Bar */
         .nav-bar {
             display: flex;
             justify-content: space-between;
@@ -727,7 +964,7 @@
         </div>
 
         <div class="header-title">
-            <span class="live-badge">🔴 LIVE</span>
+            <span class="live-badge">🔴 LIVE 1080p HD</span>
             <h1>News<span class="tv-text">TV</span></h1>
             <div class="scroll-container">
                 <span class="scroll-text">Developed by Shamsu Shaz © 2026</span>
@@ -746,9 +983,25 @@
 
     <div class="container">
 
-        <!-- Player Box -->
+        <!-- Hybrid Player Box -->
         <div class="player-container" id="player-box">
             
+            <!-- Cinematic Channel OSD Pill (Shows on Switch) -->
+            <div class="channel-osd-banner" id="channel-osd-banner">
+                <img src="" id="channel-osd-logo" class="channel-osd-logo" alt="">
+                <div class="channel-osd-text">
+                    <span class="channel-osd-name" id="channel-osd-name">Channel</span>
+                    <span class="channel-osd-status" id="channel-osd-status">⚡ INSTANT 1080p HD</span>
+                </div>
+            </div>
+
+            <!-- Ad-Shield Overlay -->
+            <div class="ad-shield-overlay" id="ad-shield-overlay">
+                <div class="ad-shield-spinner"></div>
+                <div class="ad-shield-title">പരസ്യം ഒഴിവാക്കുന്നു...</div>
+                <div class="ad-shield-sub" id="ad-shield-subtext">Skipping Pre-Roll Ad to 1080p Live</div>
+            </div>
+
             <!-- Tap to Unmute Notification -->
             <div class="center-unmute-toast" id="center-unmute-toast" style="display:none;">
                 <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
@@ -789,10 +1042,19 @@
             </div>
 
             <div class="video-wrapper" id="video-wrapper">
+                <!-- 1. Primary Player: Strict 1080p HD HLS Video Player -->
+                <video id="hls-player" class="main-player" playsinline autoplay muted preload="auto" style="display:block;"></video>
+                
+                <!-- Hidden Preload Buffers for Instant Next/Prev Switching -->
+                <video id="preload-video-next" class="preload-video-buffer" playsinline muted preload="auto"></video>
+                <video id="preload-video-prev" class="preload-video-buffer" playsinline muted preload="auto"></video>
+
+                <!-- 2. Secondary Player: 1080p YouTube Live Player -->
                 <iframe id="tv-player"
                     src=""
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                    loading="eager">
+                    loading="eager"
+                    style="display:none;">
                 </iframe>
             </div>
 
@@ -842,21 +1104,160 @@
             });
         }
 
-        // എല്ലാ ചാനലുകളുടെയും ഏറ്റവും പുതിയ ലൈവ് ഐഡികളും കൃത്യമായ സെർച്ച് വിവരങ്ങളും
+        // എല്ലാ ചാനലുകൾക്കും ഒരേപോലെ 1080p HD മുൻഗണന
         const channels = [
-            { id: 0, name: "24 News", liveVideoId: "1wECsnGZcfc", handle: "@TwentyFourNews", searchQuery: "24 News Live TV Malayalam", mustMatch: /24|twenty\s*four/i, channelId: "UC9c5_YlhC1zL-fFPlYhD0SQ", logo: "24.png" },
-            { id: 1, name: "Asianet News", liveVideoId: "x1bfKawndzs", handle: "@asianetnews", searchQuery: "Asianet News Live TV Malayalam", mustMatch: /asianet/i, channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw", logo: "asianet.png" },
-            { id: 2, name: "Manorama News", liveVideoId: "tgBTspqA5nY", handle: "@manoramanews", searchQuery: "Manorama News Live TV Malayalam", mustMatch: /manorama/i, channelId: "UC80b2_tI_k0BscsX2C-Yh9Q", logo: "manorama.png" },
-            { id: 3, name: "Mathrubhumi News", liveVideoId: "RbxEftGN584", handle: "@mathrubhuminews", searchQuery: "Mathrubhumi News Live TV", mustMatch: /mathrubhumi/i, channelId: "UCp_p0G5ZIn4C9MUpX3oR_kg", logo: "mathrubhumi.png" },
-            { id: 4, name: "MediaOne", liveVideoId: "-8d8-c0yvyU", handle: "@MediaOneTVLive", altHandle: "@MediaOneTV", searchQuery: "MediaOne Live TV Malayalam", mustMatch: /media\s*one/i, channelId: "UCrNSx22lI3bKx7O2mQpWv7w", logo: "mediaone.png" },
-            { id: 5, name: "Reporter TV", liveVideoId: "nObUcHKZEGY", handle: "@ReporterLive", searchQuery: "24x7 Reporter Live TV Malayalam", mustMatch: /reporter/i, channelId: "UC00Svh_DqMpx9YjS4rT0Tew", logo: "reporter.png" },
-            { id: 6, name: "BIG TV", liveVideoId: "vnFyrDE20G8", handle: "@BIGTV24X7", altHandle: "@BIGTVMALAYALAM", searchQuery: "BigTV Live Malayalam News Live BIG TV MALAYALAM", mustMatch: /big\s*tv|bigtv24x7/i, excludeMatch: /telugu|kannada|hindi/i, channelId: "", logo: "bigtv.png" },
-            { id: 7, name: "News Malayalam", liveVideoId: "K91rifR3BA0", handle: "@NewsMalayalam24x7", searchQuery: "News Malayalam 24x7 Live TV", mustMatch: /news\s*malayalam/i, channelId: "", logo: "newsmalayalam.png" },
-            { id: 8, name: "News18 Kerala", liveVideoId: "ke-BZTwtxWk", handle: "@News18Kerala", searchQuery: "News18 Kerala Live TV", mustMatch: /news\s*18/i, channelId: "UC-mMi78WJST4N5o8_i1FoXw", logo: "news18.png" }
+            {
+                id: 0,
+                streamKey: "24news",
+                name: "24 News",
+                hlsUrls: [
+                    "https://segment.yuppcdn.net/110322/channel24/playlist.m3u8",
+                    "https://mumt07.tangotv.in/zHjX9OFlTWENTYFOURNEWS/index.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "1wECsnGZcfc",
+                handle: "@24OnLive",
+                altHandle: "@TwentyFourNews",
+                searchQuery: "24 News Live TV Malayalam",
+                mustMatch: /24|twenty\s*four/i,
+                channelId: "UC9c5_YlhC1zL-fFPlYhD0SQ",
+                logo: "24.png"
+            },
+            {
+                id: 1,
+                streamKey: "asianet",
+                name: "Asianet News",
+                hlsUrls: [
+                    "https://asianet-samsung.vgcdn.net/ptnr-monitoring/vglive-sk-906908/playlist.m3u8",
+                    "https://streams.tangotv.in/ASIANETNEWS/ORIGIN/index.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "x1bfKawndzs",
+                handle: "@asianetnews",
+                searchQuery: "Asianet News Live TV Malayalam",
+                mustMatch: /asianet/i,
+                channelId: "UCf8w5m0YsRa8MHQ5bwSGmbw",
+                logo: "asianet.png"
+            },
+            {
+                id: 2,
+                streamKey: "manorama",
+                name: "Manorama News",
+                hlsUrls: [
+                    "https://mmtvnews1.akamaized.net/v1/master/673630b269b766886555eebfddd4f27f3de3ab50/mmtvNewsCampaign1/index.m3u8",
+                    "https://yuppmedtaorire.akamaized.net/v1/master/a0d007312bfd99c47f76b77ae26b1ccdaae76cb1/manoramanews_nim_https/240122/manoramanews/playlist.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "tgBTspqA5nY",
+                handle: "@manoramanews",
+                searchQuery: "Manorama News Live TV Malayalam",
+                mustMatch: /manorama/i,
+                channelId: "UC80b2_tI_k0BscsX2C-Yh9Q",
+                logo: "manorama.png"
+            },
+            {
+                id: 3,
+                streamKey: "mathrubhumi",
+                name: "Mathrubhumi News",
+                hlsUrls: [
+                    "https://yuppmedtaorire.akamaized.net/v1/master/a0d007312bfd99c47f76b77ae26b1ccdaae76cb1/mathrubhuminews_nim_https/110322/mathrubhuminews/playlist.m3u8",
+                    "https://streams.tangotv.in/MATHRUBHUMINEWS/ORIGIN/index.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "RbxEftGN584",
+                handle: "@mathrubhuminewstv",
+                altHandle: "@mathrubhuminews",
+                searchQuery: "Mathrubhumi News Live TV",
+                mustMatch: /mathrubhumi/i,
+                channelId: "UCp_p0G5ZIn4C9MUpX3oR_kg",
+                logo: "mathrubhumi.png"
+            },
+            {
+                id: 4,
+                streamKey: "mediaone",
+                name: "MediaOne",
+                hlsUrls: [
+                    "https://cdn.pishow.tv/ott/live/1481/master.m3u8",
+                    "https://streams.tangotv.in/MEDIAONETV/ORIGIN/index.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "-8d8-c0yvyU",
+                handle: "@MediaoneTVLive",
+                altHandle: "@MediaOneTV",
+                searchQuery: "MediaOne Live TV Malayalam",
+                mustMatch: /media\s*one/i,
+                channelId: "UCrNSx22lI3bKx7O2mQpWv7w",
+                logo: "mediaone.png"
+            },
+            {
+                id: 5,
+                streamKey: "reporter",
+                name: "Reporter TV",
+                hlsUrls: [
+                    "https://segment.yuppcdn.net/050522/reporter/playlist.m3u8",
+                    "https://mumt07.tangotv.in/zHjX9OFlREPORTERTV/index.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "nObUcHKZEGY",
+                handle: "@reporterlive",
+                searchQuery: "24x7 Reporter Live TV Malayalam",
+                mustMatch: /reporter/i,
+                channelId: "UC00Svh_DqMpx9YjS4rT0Tew",
+                logo: "reporter.png"
+            },
+            {
+                id: 6,
+                streamKey: "bigtv",
+                name: "BIG TV",
+                hlsUrls: [
+                    "https://stream.ottlive.co.in/bigtvmalayalam/index.m3u8",
+                    "https://d2gvyg6lvauoko.cloudfront.net/230226/bigtvmalyalam/chunks.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "72ngeza9aKA",
+                handle: "@bigtvkerala",
+                altHandle: "@BIGTVMALAYALAM",
+                searchQuery: "BIG TV Kerala Malayalam News Live",
+                mustMatch: /big\s*tv|bigtv/i,
+                excludeMatch: /telugu|kannada|hindi|news\s*malayalam|24\s*news|asianet|manorama|mathrubhumi|reporter|media\s*one/i,
+                channelId: "",
+                logo: "bigtv.png"
+            },
+            {
+                id: 7,
+                streamKey: "newsmalayalam",
+                name: "News Malayalam",
+                hlsUrls: [
+                    "https://cdn.pishow.tv/ott/live/1629/master.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "K91rifR3BA0",
+                handle: "@NewsMalayalam24x7",
+                searchQuery: "News Malayalam 24x7 Live TV",
+                mustMatch: /news\s*malayalam/i,
+                excludeMatch: /big\s*tv/i,
+                channelId: "",
+                logo: "newsmalayalam.png"
+            },
+            {
+                id: 8,
+                streamKey: "news18",
+                name: "News18 Kerala",
+                hlsUrls: [
+                    "https://n18syndication.akamaized.net/bpk-tv/News18_Kerala_NW18_MOB/output01/master.m3u8",
+                    "https://nw18live.cdn.jio.com/bpk-tv/News18_Kerala_NW18_MOB/output01/index.m3u8"
+                ],
+                preferYouTube1080p: true,
+                liveVideoId: "ke-BZTwtxWk",
+                handle: "@News18Kerala",
+                searchQuery: "News18 Kerala Live TV",
+                mustMatch: /news\s*18/i,
+                channelId: "UC-mMi78WJST4N5o8_i1FoXw",
+                logo: "news18.png"
+            }
         ];
 
-        // വേർഷൻ മാറുമ്പോൾ പഴയ കാഷെ തനിയെ ക്ലിയർ ചെയ്യുന്നു
-        const CACHE_VERSION = "v6_2026_11_01_adshield";
+        const CACHE_VERSION = "v24_2026_11_09_instant_switch_parallel_race";
         if (localStorage.getItem('news_tv_cache_ver') !== CACHE_VERSION) {
             localStorage.removeItem('news_tv_live_ids');
             localStorage.removeItem('news_tv_expired_ids');
@@ -864,7 +1265,7 @@
         }
 
         const savedLiveIds = JSON.parse(localStorage.getItem('news_tv_live_ids')) || {};
-        const defaultExpired = ["s0LLVQeMmtU", "72ngeza9aKA", "l4CTvEXbTJg", "HHd_4Bp3v6k", "M_2UPAcgxrY"];
+        const defaultExpired = ["s0LLVQeMmtU", "l4CTvEXbTJg", "HHd_4Bp3v6k", "M_2UPAcgxrY"];
         let expiredIds = JSON.parse(localStorage.getItem('news_tv_expired_ids')) || defaultExpired;
         defaultExpired.forEach(id => {
             if (!expiredIds.includes(id)) expiredIds.push(id);
@@ -893,15 +1294,62 @@
         let favorites = JSON.parse(localStorage.getItem('news_tv_favs')) || [];
         let deferredPrompt = null;
         let wakeLock = null;
-        let fsChannelTimer;
+        let fsChannelTimer = null;
+        let osdBannerTimer = null;
+        let preloadScheduleTimer = null;
         let autoRecoverInProgress = false;
         let attemptedAutoRecover = {};
         let playerReady = false;
         
+        let hlsInstance = null;
+        let usingHls = false;
+        let isAdPlaying = false;
+        let adSafetyTimeout = null;
+        let lastAdEvictTime = 0;
+        let adReloadBurstCount = 0;
+        let ytPollInterval = null;
+        let playSessionId = 0;
+        let failedOfficialHls = {};
+        let verifiedHdUrls = {};
+        let bestChannelHlsUrl = JSON.parse(localStorage.getItem('news_tv_best_hls')) || {};
+        let githubStreams = JSON.parse(localStorage.getItem('news_tv_gh_streams')) || {};
+
+        function saveBestHlsCache() {
+            try {
+                localStorage.setItem('news_tv_best_hls', JSON.stringify(bestChannelHlsUrl));
+            } catch (e) {}
+        }
+
+        // Dual Preload Pool (Next & Previous Channels)
+        const preloadPool = {
+            next: { channelId: -1, url: null, hls: null, ready: false, videoElId: 'preload-video-next' },
+            prev: { channelId: -1, url: null, hls: null, ready: false, videoElId: 'preload-video-prev' }
+        };
+
         let hasShownSwipeHint = false; 
         let showTimeMode = true;
 
-        // IFrame Player-ലേക്ക് കമാൻഡുകൾ അയക്കുന്ന ഫങ്ഷൻ
+        async function loadGitHubActionStreams() {
+            const urlsToTry = [
+                `./streams.json?t=${Date.now()}`,
+                `https://raw.githubusercontent.com/shamsushaz14-debug/Livenews-/main/streams.json?t=${Date.now()}`
+            ];
+            try {
+                const fastestData = await Promise.any(urlsToTry.map(async (u) => {
+                    const controller = new AbortController();
+                    const timer = setTimeout(() => controller.abort(), 1100);
+                    const res = await fetch(u, { cache: "no-store", signal: controller.signal });
+                    clearTimeout(timer);
+                    if (!res.ok) throw new Error("Not OK");
+                    const data = await res.json();
+                    if (data && typeof data === 'object' && Object.keys(data).length > 0) return data;
+                    throw new Error("Empty");
+                }));
+                githubStreams = fastestData;
+                localStorage.setItem('news_tv_gh_streams', JSON.stringify(githubStreams));
+            } catch (e) {}
+        }
+
         function sendPlayerCommand(func, args = []) {
             const iframe = document.getElementById('tv-player');
             if (iframe && iframe.contentWindow) {
@@ -913,6 +1361,734 @@
                     }), '*');
                 } catch (e) {}
             }
+        }
+
+        function enforceYouTubeHighQuality() {
+            sendPlayerCommand('setPlaybackQualityRange', ['hd1080', 'hd1080']);
+            sendPlayerCommand('setPlaybackQuality', ['hd1080']);
+        }
+
+        function startYouTubeApiPolling() {
+            stopYouTubeApiPolling();
+            const iframe = document.getElementById('tv-player');
+            ytPollInterval = setInterval(() => {
+                if (usingHls || currentIndex === -1 || !iframe || !iframe.contentWindow) return;
+                try {
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'listening',
+                        id: 1
+                    }), '*');
+                    enforceYouTubeHighQuality();
+                } catch (e) {}
+            }, 250);
+        }
+
+        function stopYouTubeApiPolling() {
+            if (ytPollInterval) {
+                clearInterval(ytPollInterval);
+                ytPollInterval = null;
+            }
+        }
+
+        function setAdShieldState(active, subText = "Skipping Pre-Roll Ad to 1080p Live") {
+            const shield = document.getElementById('ad-shield-overlay');
+            const subEl = document.getElementById('ad-shield-subtext');
+            if (!shield) return;
+
+            if (subEl && subText) subEl.innerText = subText;
+
+            if (active && !isAdPlaying) {
+                isAdPlaying = true;
+                shield.style.display = 'flex';
+                sendPlayerCommand('mute');
+                clearTimeout(adSafetyTimeout);
+                adSafetyTimeout = setTimeout(() => {
+                    setAdShieldState(false);
+                }, 4000);
+            } else if (!active && isAdPlaying) {
+                isAdPlaying = false;
+                adReloadBurstCount = 0;
+                shield.style.display = 'none';
+                clearTimeout(adSafetyTimeout);
+                sendPlayerCommand('setPlaybackRate', [1]);
+                sendPlayerCommand(isMuted ? 'mute' : 'unMute');
+                enforceYouTubeHighQuality();
+            }
+        }
+
+        function triggerAggressiveAdBypass(expectedId, dur, cur) {
+            setAdShieldState(true, `Bypassing Ad (${Math.min(adReloadBurstCount + 1, 4)})...`);
+
+            sendPlayerCommand('mute');
+            sendPlayerCommand('setPlaybackRate', [16]);
+            sendPlayerCommand('setPlaybackRate', [2]);
+            if (typeof dur === 'number' && dur > 0 && dur <= 300) {
+                if (typeof cur !== 'number' || cur < dur - 0.5) {
+                    sendPlayerCommand('seekTo', [dur, true]);
+                }
+            }
+
+            const now = Date.now();
+            if (now - lastAdEvictTime > 220) {
+                lastAdEvictTime = now;
+                adReloadBurstCount++;
+
+                if (adReloadBurstCount <= 3) {
+                    sendPlayerCommand('loadVideoById', [{
+                        videoId: expectedId,
+                        suggestedQuality: 'hd1080'
+                    }]);
+                    sendPlayerCommand('playVideo');
+                    enforceYouTubeHighQuality();
+                } else if (adReloadBurstCount === 4) {
+                    const iframe = document.getElementById('tv-player');
+                    if (iframe && currentIndex !== -1) {
+                        const originParam = location.origin && location.origin !== 'null' ? `&origin=${encodeURIComponent(location.origin)}` : '';
+                        iframe.src = `https://www.youtube-nocookie.com/embed/${expectedId}?autoplay=1&mute=1&enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&vq=hd1080&_r=${Date.now()}${originParam}`;
+                    }
+                } else {
+                    adReloadBurstCount = 0;
+                }
+            }
+        }
+
+        function getActiveMainVideoEl() {
+            return document.querySelector('#video-wrapper video.main-player') || document.getElementById('hls-player');
+        }
+
+        function stopHlsPlayer() {
+            usingHls = false;
+            const videoEl = getActiveMainVideoEl();
+            if (hlsInstance) {
+                try { hlsInstance.destroy(); } catch (e) {}
+                hlsInstance = null;
+            }
+            if (videoEl) {
+                videoEl.pause();
+                videoEl.removeAttribute('src');
+                videoEl.load();
+                videoEl.style.display = 'none';
+            }
+        }
+
+        function clearPreloadSlot(slotKey) {
+            const slot = preloadPool[slotKey];
+            if (!slot) return;
+            if (slot.hls) {
+                try { slot.hls.destroy(); } catch (e) {}
+                slot.hls = null;
+            }
+            const vEl = document.getElementById(slot.videoElId);
+            if (vEl) {
+                vEl.pause();
+                vEl.removeAttribute('src');
+                vEl.load();
+            }
+            slot.channelId = -1;
+            slot.url = null;
+            slot.ready = false;
+        }
+
+        function clearAllPreloads() {
+            clearTimeout(preloadScheduleTimer);
+            clearPreloadSlot('next');
+            clearPreloadSlot('prev');
+        }
+
+        function getCandidateHlsList(channel) {
+            const list = [];
+            if (bestChannelHlsUrl[channel.id] && !failedOfficialHls[bestChannelHlsUrl[channel.id]]) {
+                list.push({ url: bestChannelHlsUrl[channel.id], strictHd: true });
+            }
+            if (channel.streamKey && githubStreams[channel.streamKey]) {
+                const ghEntry = githubStreams[channel.streamKey];
+                const ghUrl = typeof ghEntry === 'string' ? ghEntry : (ghEntry && ghEntry.url ? ghEntry.url : null);
+                if (ghUrl && !list.some(i => i.url === ghUrl)) {
+                    list.push({ url: ghUrl, strictHd: true });
+                }
+            }
+            if (channel.hlsUrls && channel.hlsUrls.length > 0) {
+                channel.hlsUrls.forEach(u => {
+                    if (!list.some(i => i.url === u)) {
+                        list.push({ url: u, strictHd: true });
+                    }
+                });
+            }
+            return list.filter(item => !(failedOfficialHls[item.url] && (Date.now() - failedOfficialHls[item.url] < 180000)));
+        }
+
+        async function verifyFastHdManifest(url, requireStrictHd, timeoutMs = 600) {
+            if (verifiedHdUrls[url]) return url;
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const res = await fetch(url, { signal: controller.signal });
+                clearTimeout(timer);
+                if (!res.ok) throw new Error("HTTP error");
+                const text = await res.text();
+                if (!text.includes("#EXTM3U")) throw new Error("Invalid M3U8");
+
+                if (requireStrictHd && text.includes("RESOLUTION=")) {
+                    const resMatches = [...text.matchAll(/RESOLUTION=(\d+)x(\d+)/g)];
+                    if (resMatches.length > 0) {
+                        let maxH = 0;
+                        resMatches.forEach(m => {
+                            const w = parseInt(m[1], 10);
+                            const h = parseInt(m[2], 10);
+                            const effectiveHeight = Math.min(w, h);
+                            if (effectiveHeight > maxH) maxH = effectiveHeight;
+                        });
+                        if (maxH > 0 && maxH < 720) {
+                            throw new Error("Stream is SD (<720p)");
+                        }
+                    }
+                }
+                verifiedHdUrls[url] = true;
+                return url;
+            } catch (err) {
+                clearTimeout(timer);
+                if (err && err.message === "Stream is SD (<720p)") {
+                    failedOfficialHls[url] = Date.now();
+                    throw err;
+                }
+                return url;
+            }
+        }
+
+        function lockHlsHighestLevel(hlsObj, requireStrictHd = true) {
+            if (!hlsObj || !hlsObj.levels || hlsObj.levels.length === 0) return true;
+            let bestLevel = -1;
+            let maxHeight = 0;
+            let maxBitrate = 0;
+
+            hlsObj.levels.forEach((lvl, idx) => {
+                const h = lvl.height || 0;
+                const b = lvl.bitrate || 0;
+                if (h > maxHeight || (h === maxHeight && b > maxBitrate)) {
+                    maxHeight = h;
+                    maxBitrate = b;
+                    bestLevel = idx;
+                }
+            });
+
+            if (requireStrictHd && maxHeight > 0 && maxHeight < 720) {
+                return false;
+            }
+
+            if (bestLevel !== -1) {
+                hlsObj.startLevel = bestLevel;
+                hlsObj.currentLevel = bestLevel;
+                hlsObj.nextLevel = bestLevel;
+                hlsObj.loadLevel = bestLevel;
+            }
+            return true;
+        }
+
+        function bindMainHlsEvents(hlsObj, hlsUrl, session) {
+            hlsObj.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
+                if (!hlsObj || !hlsObj.levels || hlsObj.levels.length <= 1) return;
+                let bestIdx = 0;
+                let maxH = 0;
+                let maxB = 0;
+                hlsObj.levels.forEach((lvl, idx) => {
+                    const h = lvl.height || 0;
+                    const b = lvl.bitrate || 0;
+                    if (h > maxH || (h === maxH && b > maxB)) {
+                        maxH = h;
+                        maxB = b;
+                        bestIdx = idx;
+                    }
+                });
+                if (data.level !== bestIdx) {
+                    hlsObj.currentLevel = bestIdx;
+                    hlsObj.nextLevel = bestIdx;
+                }
+            });
+
+            hlsObj.on(Hls.Events.ERROR, (event, data) => {
+                if (data.fatal && hlsInstance === hlsObj) {
+                    stopHlsPlayer();
+                    if (session === playSessionId && currentIndex !== -1) {
+                        failedOfficialHls[hlsUrl] = Date.now();
+                        if (bestChannelHlsUrl[channels[currentIndex].id] === hlsUrl) {
+                            delete bestChannelHlsUrl[channels[currentIndex].id];
+                            saveBestHlsCache();
+                        }
+                        playChannel(currentIndex, false);
+                    }
+                }
+            });
+        }
+
+        // അടുത്തതും മുമ്പത്തേതുമായ ചാനലുകൾ പശ്ചാത്തലത്തിൽ അതിവേഗം Preload ചെയ്യുന്നു
+        async function preloadChannelIntoSlot(slotKey, targetIndex) {
+            if (targetIndex < 0 || targetIndex >= channels.length) return;
+            const channel = channels[targetIndex];
+            const slot = preloadPool[slotKey];
+            if (!slot || !window.Hls || !Hls.isSupported()) return;
+
+            if (slot.channelId === channel.id && slot.ready && slot.hls) return;
+
+            clearPreloadSlot(slotKey);
+
+            const candidates = getCandidateHlsList(channel);
+            if (candidates.length === 0) return;
+
+            let chosenUrl = candidates[0].url;
+            if (candidates.length > 1 && !bestChannelHlsUrl[channel.id]) {
+                try {
+                    const fastest = await Promise.any(candidates.map(async c => {
+                        await verifyFastHdManifest(c.url, c.strictHd, 550);
+                        return c.url;
+                    }));
+                    chosenUrl = fastest;
+                } catch (e) {}
+            }
+
+            if (currentIndex === -1 || currentIndex === targetIndex) return;
+
+            const preloadVideo = document.getElementById(slot.videoElId);
+            if (!preloadVideo) return;
+
+            const preHls = new Hls({
+                enableWorker: true,
+                lowLatencyMode: true,
+                liveSyncDurationCount: 1.0,
+                liveMaxLatencyDurationCount: 2.2,
+                maxBufferLength: 2.5,
+                maxMaxBufferLength: 4,
+                backBufferLength: 0,
+                startFragPrefetch: true,
+                startLevel: -1,
+                capLevelToPlayerSize: false,
+                abrEwmaDefaultEstimate: 50000000,
+                manifestLoadingTimeOut: 900,
+                levelLoadingTimeOut: 900,
+                fragLoadingTimeOut: 1400
+            });
+
+            slot.channelId = channel.id;
+            slot.url = chosenUrl;
+            slot.hls = preHls;
+            slot.ready = false;
+
+            preHls.loadSource(chosenUrl);
+            preHls.attachMedia(preloadVideo);
+
+            preHls.on(Hls.Events.MANIFEST_PARSED, () => {
+                if (slot.hls !== preHls) return;
+                const isHdOk = lockHlsHighestLevel(preHls, true);
+                if (!isHdOk) {
+                    failedOfficialHls[chosenUrl] = Date.now();
+                    clearPreloadSlot(slotKey);
+                    return;
+                }
+                bestChannelHlsUrl[channel.id] = chosenUrl;
+                saveBestHlsCache();
+                // മാനിഫെസ്റ്റ് റെഡിയായ നിമിഷം തന്നെ സ്ലോട്ട് Instant Swap-ന് തയ്യാറാകുന്നു (FRAG_BUFFERED കാത്തിരിപ്പില്ല)
+                slot.ready = true;
+                preloadVideo.muted = true;
+                preloadVideo.play().catch(() => {});
+            });
+
+            preHls.on(Hls.Events.ERROR, (ev, data) => {
+                if (data.fatal && slot.hls === preHls) {
+                    failedOfficialHls[chosenUrl] = Date.now();
+                    clearPreloadSlot(slotKey);
+                }
+            });
+        }
+
+        // ഗ്രിഡിലോ ഐക്കണിലോ വിരൽ തൊടുമ്പോൾ തന്നെ ആ ചാനൽ Pre-warm ചെയ്യുന്നു
+        function prewarmChannelById(id) {
+            const targetIdx = channels.findIndex(c => c.id === id);
+            if (targetIdx === -1 || targetIdx === currentIndex) return;
+            if (preloadPool.next.channelId === id || preloadPool.prev.channelId === id) return;
+            preloadChannelIntoSlot('next', targetIdx);
+        }
+
+        function getNeighborIndices(index) {
+            if (index === -1) return { nextIdx: 0, prevIdx: channels.length - 1 };
+            const currentCh = channels[index];
+            const isFav = favorites.includes(currentCh.id);
+
+            if (isFav && favorites.length > 1) {
+                const favPos = favorites.indexOf(currentCh.id);
+                const nextFavId = favorites[(favPos + 1) % favorites.length];
+                const prevFavId = favorites[(favPos - 1 + favorites.length) % favorites.length];
+                return {
+                    nextIdx: channels.findIndex(c => c.id === nextFavId),
+                    prevIdx: channels.findIndex(c => c.id === prevFavId)
+                };
+            }
+
+            return {
+                nextIdx: (index + 1) % channels.length,
+                prevIdx: (index - 1 + channels.length) % channels.length
+            };
+        }
+
+        function scheduleNeighborPreloads() {
+            clearTimeout(preloadScheduleTimer);
+            preloadScheduleTimer = setTimeout(() => {
+                if (currentIndex === -1) return;
+                const { nextIdx, prevIdx } = getNeighborIndices(currentIndex);
+                if (nextIdx !== -1 && nextIdx !== currentIndex) {
+                    preloadChannelIntoSlot('next', nextIdx);
+                }
+                if (prevIdx !== -1 && prevIdx !== currentIndex && prevIdx !== nextIdx) {
+                    preloadChannelIntoSlot('prev', prevIdx);
+                }
+            }, 80); // 80ms-ൽ ഉടൻ അടുത്ത ചാനൽ പ്രീലോഡ് തുടങ്ങുന്നു
+        }
+
+        // Preload ചെയ്ത വീഡിയോ എലമെന്റ് തൽക്ഷണം Main Player ആയി മാറ്റുന്നു
+        function tryActivatePreloadedChannel(channel, session) {
+            const slotKey = ['next', 'prev'].find(k =>
+                preloadPool[k].channelId === channel.id &&
+                preloadPool[k].ready &&
+                preloadPool[k].hls
+            );
+            if (!slotKey) return false;
+
+            const slot = preloadPool[slotKey];
+            const preloadedVideo = document.getElementById(slot.videoElId);
+            const currentMainVideo = getActiveMainVideoEl();
+            const iframe = document.getElementById('tv-player');
+
+            if (!preloadedVideo || !currentMainVideo) return false;
+
+            if (hlsInstance) {
+                try { hlsInstance.destroy(); } catch (e) {}
+                hlsInstance = null;
+            }
+            currentMainVideo.pause();
+            currentMainVideo.removeAttribute('src');
+            currentMainVideo.load();
+            currentMainVideo.style.display = 'none';
+            currentMainVideo.className = 'preload-video-buffer';
+            currentMainVideo.id = slot.videoElId;
+
+            preloadedVideo.id = 'hls-player';
+            preloadedVideo.className = 'main-player';
+            preloadedVideo.style.display = 'block';
+            preloadedVideo.muted = isMuted;
+
+            hlsInstance = slot.hls;
+            const activeUrl = slot.url;
+
+            slot.hls = null;
+            slot.channelId = -1;
+            slot.url = null;
+            slot.ready = false;
+
+            usingHls = true;
+            stopYouTubeApiPolling();
+            setAdShieldState(false);
+            sendPlayerCommand('stopVideo');
+            if (iframe) iframe.style.display = 'none';
+
+            bindMainHlsEvents(hlsInstance, activeUrl, session);
+
+            if (hlsInstance.liveSyncPosition && Math.abs(preloadedVideo.currentTime - hlsInstance.liveSyncPosition) > 4) {
+                try { preloadedVideo.currentTime = hlsInstance.liveSyncPosition; } catch (e) {}
+            }
+
+            preloadedVideo.play().catch(() => {
+                preloadedVideo.muted = true;
+                preloadedVideo.play().catch(() => {});
+            });
+
+            return true;
+        }
+
+        // Parallel HLS Race: ഒന്നിലധികം ലിങ്കുകൾ ഉള്ള ചാനലുകളിൽ കാത്തിരിപ്പില്ലാതെ ഏറ്റവും വേഗം റെഡിയാകുന്ന ലിങ്ക് തിരഞ്ഞെടുക്കുന്നു
+        function raceHlsCandidates(candidates, session, timeoutMs = 850) {
+            return new Promise((resolve, reject) => {
+                if (session !== playSessionId || candidates.length === 0) return reject();
+
+                let settled = false;
+                let failCount = 0;
+                const tempControllers = [];
+
+                const cleanupLosers = (winnerHls) => {
+                    tempControllers.forEach(item => {
+                        if (item.hls !== winnerHls) {
+                            try { item.hls.destroy(); } catch (e) {}
+                        }
+                    });
+                };
+
+                const raceTimer = setTimeout(() => {
+                    if (!settled) {
+                        settled = true;
+                        cleanupLosers(null);
+                        reject(new Error("Race timeout"));
+                    }
+                }, timeoutMs);
+
+                candidates.forEach(cand => {
+                    const hls = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: true,
+                        liveSyncDurationCount: 1.0,
+                        liveMaxLatencyDurationCount: 2.3,
+                        maxBufferLength: 4,
+                        maxMaxBufferLength: 10,
+                        backBufferLength: 2,
+                        startFragPrefetch: true,
+                        startLevel: -1,
+                        capLevelToPlayerSize: false,
+                        abrEwmaDefaultEstimate: 50000000,
+                        manifestLoadingTimeOut: timeoutMs,
+                        manifestLoadingMaxRetry: 0,
+                        levelLoadingTimeOut: timeoutMs,
+                        fragLoadingTimeOut: 1500
+                    });
+
+                    tempControllers.push({ hls, url: cand.url });
+
+                    hls.on(Hls.Events.MANIFEST_PARSED, () => {
+                        if (settled || session !== playSessionId) {
+                            try { hls.destroy(); } catch (e) {}
+                            return;
+                        }
+
+                        const isHdOk = lockHlsHighestLevel(hls, cand.strictHd);
+                        if (!isHdOk) {
+                            failedOfficialHls[cand.url] = Date.now();
+                            try { hls.destroy(); } catch (e) {}
+                            failCount++;
+                            if (failCount === candidates.length && !settled) {
+                                settled = true;
+                                clearTimeout(raceTimer);
+                                reject(new Error("All SD or failed"));
+                            }
+                            return;
+                        }
+
+                        settled = true;
+                        clearTimeout(raceTimer);
+                        cleanupLosers(hls);
+                        resolve({ hls, url: cand.url });
+                    });
+
+                    hls.on(Hls.Events.ERROR, (ev, data) => {
+                        if (data.fatal && !settled) {
+                            failedOfficialHls[cand.url] = Date.now();
+                            try { hls.destroy(); } catch (e) {}
+                            failCount++;
+                            if (failCount === candidates.length && !settled) {
+                                settled = true;
+                                clearTimeout(raceTimer);
+                                reject(new Error("All fatal"));
+                            }
+                        }
+                    });
+
+                    hls.loadSource(cand.url);
+                });
+            });
+        }
+
+        async function tryOfficialHlsStreams(channel, session) {
+            const activeCandidates = getCandidateHlsList(channel);
+            if (activeCandidates.length === 0) return false;
+
+            const videoEl = getActiveMainVideoEl();
+            const iframe = document.getElementById('tv-player');
+            if (!videoEl) return false;
+
+            if (window.Hls && Hls.isSupported()) {
+                try {
+                    // ലഭ്യമായ ലിങ്കുകൾ ഒരേസമയം (Parallel) പരിശോധിച്ച് ആദ്യം റെഡിയാകുന്ന 1080p സ്ട്രീം എടുക്കുന്നു
+                    const winner = await raceHlsCandidates(activeCandidates.slice(0, 3), session, 850);
+                    if (session !== playSessionId) {
+                        try { winner.hls.destroy(); } catch (e) {}
+                        return false;
+                    }
+
+                    stopHlsPlayer();
+                    hlsInstance = winner.hls;
+                    verifiedHdUrls[winner.url] = true;
+                    bestChannelHlsUrl[channel.id] = winner.url;
+                    saveBestHlsCache();
+
+                    usingHls = true;
+                    stopYouTubeApiPolling();
+                    setAdShieldState(false);
+                    sendPlayerCommand('stopVideo');
+
+                    if (iframe) iframe.style.display = 'none';
+                    videoEl.style.display = 'block';
+                    videoEl.muted = isMuted;
+
+                    hlsInstance.attachMedia(videoEl);
+                    videoEl.play().catch(() => {
+                        videoEl.muted = true;
+                        videoEl.play().catch(() => {});
+                    });
+
+                    bindMainHlsEvents(hlsInstance, winner.url, session);
+                    return true;
+                } catch (e) {
+                    if (bestChannelHlsUrl[channel.id]) {
+                        delete bestChannelHlsUrl[channel.id];
+                        saveBestHlsCache();
+                    }
+                    return false;
+                }
+            } else if (videoEl.canPlayType('application/vnd.apple.mpegurl')) {
+                for (const item of activeCandidates) {
+                    if (session !== playSessionId) return false;
+                    try {
+                        await new Promise((resolve, reject) => {
+                            stopHlsPlayer();
+                            const t = setTimeout(() => reject(), 900);
+                            videoEl.addEventListener('loadedmetadata', () => {
+                                clearTimeout(t);
+                                usingHls = true;
+                                stopYouTubeApiPolling();
+                                setAdShieldState(false);
+                                sendPlayerCommand('stopVideo');
+                                iframe.style.display = 'none';
+                                videoEl.style.display = 'block';
+                                videoEl.muted = isMuted;
+                                videoEl.play().then(resolve).catch(resolve);
+                            }, { once: true });
+                            videoEl.addEventListener('error', () => {
+                                clearTimeout(t);
+                                reject();
+                            }, { once: true });
+                            videoEl.src = item.url;
+                            videoEl.load();
+                        });
+                        return true;
+                    } catch (e) {}
+                }
+            }
+            return false;
+        }
+
+        function loadYouTubeEmbed(channel, forceIframeReload = false) {
+            if (usingHls) return;
+            const iframe = document.getElementById('tv-player');
+            iframe.style.display = 'block';
+            const muteParam = isMuted ? 1 : 0;
+
+            adReloadBurstCount = 0;
+            lastAdEvictTime = 0;
+            startYouTubeApiPolling();
+
+            if (playerReady && !forceIframeReload && iframe.src && iframe.src.includes('/embed/')) {
+                sendPlayerCommand('loadVideoById', [{
+                    videoId: channel.liveVideoId,
+                    suggestedQuality: 'hd1080'
+                }]);
+                setTimeout(() => {
+                    if (!isAdPlaying) {
+                        sendPlayerCommand(isMuted ? 'mute' : 'unMute');
+                    }
+                    sendPlayerCommand('playVideo');
+                    enforceYouTubeHighQuality();
+                }, 40);
+            } else {
+                const originParam = location.origin && location.origin !== 'null' ? `&origin=${encodeURIComponent(location.origin)}` : '';
+                iframe.src = `https://www.youtube-nocookie.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&vq=hd1080${originParam}`;
+            }
+        }
+
+        function triggerCinematicSwitchTransition(channel, isInstantPreload = false, skipFade = false) {
+            const wrapper = document.getElementById('video-wrapper');
+            const banner = document.getElementById('channel-osd-banner');
+            const logoEl = document.getElementById('channel-osd-logo');
+            const nameEl = document.getElementById('channel-osd-name');
+            const statusEl = document.getElementById('channel-osd-status');
+
+            if (wrapper && !skipFade) {
+                wrapper.classList.remove('ch-switched-in');
+                wrapper.classList.add('ch-switching');
+                setTimeout(() => {
+                    wrapper.classList.remove('ch-switching');
+                    wrapper.classList.add('ch-switched-in');
+                }, 70);
+            }
+
+            if (banner && logoEl && nameEl && statusEl) {
+                logoEl.src = channel.logo;
+                logoEl.onerror = function() {
+                    this.onerror = null;
+                    this.src = `https://via.placeholder.com/24/1e1e1e/ffffff?text=${channel.name.charAt(0)}`;
+                };
+                nameEl.innerText = channel.name;
+                statusEl.innerText = isInstantPreload ? "⚡ INSTANT 1080p HD" : "🔴 LIVE 1080p HD";
+                banner.classList.add('show');
+                clearTimeout(osdBannerTimer);
+                osdBannerTimer = setTimeout(() => {
+                    banner.classList.remove('show');
+                }, 1800);
+            }
+        }
+
+        async function playChannel(index, forceIframeReload = false) {
+            const isFirstBoot = (currentIndex === -1);
+            currentIndex = index;
+            const session = ++playSessionId;
+            const channel = channels[currentIndex];
+            const playerBox = document.getElementById('player-box');
+
+            if (playerBox.style.display !== "block") {
+                playerBox.style.display = "block";
+            }
+
+            playerBox.classList.toggle('ch-mediaone', channel.id === 4);
+
+            setAdShieldState(false);
+            adReloadBurstCount = 0;
+            requestWakeLock();
+            updateFsActiveIcon();
+            updateToastUI();
+
+            // 1. Preload ബഫറിൽ ചാനൽ തയ്യാറാണെങ്കിൽ കാത്തിരിപ്പില്ലാതെ തൽക്ഷണം പ്ലേ ചെയ്യുന്നു
+            if (!forceIframeReload && tryActivatePreloadedChannel(channel, session)) {
+                triggerCinematicSwitchTransition(channel, true, isFirstBoot);
+                scheduleNeighborPreloads();
+                return;
+            }
+
+            triggerCinematicSwitchTransition(channel, false, isFirstBoot);
+
+            let news18WorkerPromise = null;
+            if (channel.id === 8) {
+                news18WorkerPromise = fetchWithTimeout(`https://news18-live-fetcher.shamsushaz14.workers.dev?t=${Date.now()}`, 950)
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data && data.videoId && !expiredIds.includes(data.videoId)) {
+                            channel.liveVideoId = data.videoId;
+                            savedLiveIds[channel.id] = data.videoId;
+                            localStorage.setItem('news_tv_live_ids', JSON.stringify(savedLiveIds));
+                        }
+                    })
+                    .catch(() => {});
+            }
+
+            const hlsSuccess = await tryOfficialHlsStreams(channel, session);
+            if (session !== playSessionId) return;
+
+            if (hlsSuccess) {
+                scheduleNeighborPreloads();
+                return;
+            }
+
+            stopHlsPlayer();
+
+            if (news18WorkerPromise) {
+                await news18WorkerPromise;
+            }
+
+            if (session !== playSessionId) return;
+            loadYouTubeEmbed(channel, forceIframeReload);
+            scheduleNeighborPreloads();
         }
 
         function renderClockContent() {
@@ -1023,7 +2199,7 @@
             if (!fsList) return;
             let html = '';
             channels.forEach(ch => {
-                html += `<img src="${ch.logo}" class="fs-channel-icon" id="fs-icon-${ch.id}" onclick="fsPlayChannel(${ch.id})" alt="${ch.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/40/1e1e1e/ffffff?text=${ch.name.charAt(0)}';">`;
+                html += `<img src="${ch.logo}" class="fs-channel-icon" id="fs-icon-${ch.id}" ontouchstart="prewarmChannelById(${ch.id})" onmouseenter="prewarmChannelById(${ch.id})" onclick="fsPlayChannel(${ch.id})" alt="${ch.name}" onerror="this.onerror=null; this.src='https://via.placeholder.com/36/1e1e1e/ffffff?text=${ch.name.charAt(0)}';">`;
             });
             fsList.innerHTML = html;
         }
@@ -1059,7 +2235,7 @@
 
         function createChannelCardHTML(ch, isFav) {
             return `
-                <div class="card">
+                <div class="card" ontouchstart="prewarmChannelById(${ch.id})" onmouseenter="prewarmChannelById(${ch.id})">
                     <button class="fav-star ${isFav ? 'active' : ''}" onclick="toggleFavorite(event, ${ch.id})" title="Favorite">
                         <svg viewBox="0 0 24 24">
                             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
@@ -1082,6 +2258,7 @@
             }
             localStorage.setItem('news_tv_favs', JSON.stringify(favorites));
             buildGrid();
+            scheduleNeighborPreloads();
         }
 
         function playChannelById(id) {
@@ -1105,52 +2282,6 @@
             }
         }
 
-        // പരസ്യം പരമാവധി ഒഴിവാക്കാൻ ഒരേ പ്ലെയറിനുള്ളിൽ loadVideoById ഉപയോഗിച്ച് ചാനൽ മാറ്റുന്നു
-        async function playChannel(index, forceIframeReload = false) {
-            currentIndex = index;
-            const channel = channels[currentIndex];
-            const playerBox = document.getElementById('player-box');
-            const iframe = document.getElementById('tv-player');
-
-            if (playerBox.style.display !== "block") {
-                playerBox.style.display = "block";
-            }
-
-            requestWakeLock();
-            updateFsActiveIcon();
-            updateToastUI();
-
-            const muteParam = isMuted ? 1 : 0;
-
-            if (channel.id === 8) {
-                try {
-                    const response = await fetchWithTimeout(`https://news18-live-fetcher.shamsushaz14.workers.dev?t=${Date.now()}`, 3500);
-                    const data = await response.json();
-                    if (data.videoId && !expiredIds.includes(data.videoId)) {
-                        channel.liveVideoId = data.videoId;
-                        savedLiveIds[channel.id] = data.videoId;
-                        localStorage.setItem('news_tv_live_ids', JSON.stringify(savedLiveIds));
-                    }
-                } catch (err) {}
-            }
-
-            // പ്ലെയർ ഇതിനകം റെഡിയാണെങ്കിൽ iframe റീലോഡ് ചെയ്യാതെ ഉള്ളിലെ സ്ട്രീം മാത്രം മാറ്റുന്നു (ഇത് Pre-roll പരസ്യങ്ങൾ ഒഴിവാക്കും)
-            if (playerReady && !forceIframeReload && iframe.src && iframe.src.includes('/embed/')) {
-                sendPlayerCommand('loadVideoById', [{
-                    videoId: channel.liveVideoId,
-                    startSeconds: 0
-                }]);
-                setTimeout(() => {
-                    sendPlayerCommand(isMuted ? 'mute' : 'unMute');
-                    sendPlayerCommand('playVideo');
-                }, 150);
-            } else {
-                const originParam = location.origin && location.origin !== 'null' ? `&origin=${encodeURIComponent(location.origin)}` : '';
-                iframe.src = `https://www.youtube-nocookie.com/embed/${channel.liveVideoId}?autoplay=1&mute=${muteParam}&enablejsapi=1&playsinline=1&rel=0&modestbranding=1& iv_load_policy=3${originParam}`;
-            }
-        }
-
-        // YouTube IFrame API കണക്ഷനും Auto Ad-Skipper സംവിധാനവും
         const iframeEl = document.getElementById('tv-player');
         if (iframeEl) {
             iframeEl.addEventListener('load', () => {
@@ -1161,6 +2292,7 @@
                             event: 'listening',
                             id: 1
                         }), '*');
+                        setTimeout(enforceYouTubeHighQuality, 100);
                     }
                 } catch (e) {}
             });
@@ -1168,22 +2300,27 @@
 
         window.addEventListener('message', (event) => {
             if (!event.origin.includes('youtube.com') && !event.origin.includes('youtube-nocookie.com')) return;
+            if (usingHls) return;
+
             try {
                 const data = JSON.parse(event.data);
 
-                // പരസ്യമാണോ പ്ലേ ആകുന്നതെന്ന് പരിശോധിച്ച് 2x വേഗതയിലാക്കുകയും സ്കിപ്പ് ചെയ്യുകയും ചെയ്യുന്നു
-                if (data.event === 'infoDelivery' && data.info) {
-                    const dur = data.info.duration;
-                    const cur = data.info.currentTime;
+                if (data.event === 'infoDelivery' && data.info && currentIndex !== -1) {
+                    const info = data.info;
+                    const expectedId = channels[currentIndex].liveVideoId;
+                    const playingId = info.videoData && info.videoData.video_id ? info.videoData.video_id : null;
+                    const dur = info.duration;
+                    const cur = info.currentTime;
 
-                    // ലൈവ് സ്ട്രീമുകൾക്ക് പകരം ചെറിയ ദൈർഘ്യമുള്ള പരസ്യങ്ങൾ (5 മിനിറ്റിൽ താഴെ) ആണെങ്കിൽ Fast-Forward ചെയ്യുന്നു
-                    if (typeof dur === 'number' && dur > 0 && dur < 300) {
-                        sendPlayerCommand('setPlaybackRate', [2]);
-                        if (typeof cur === 'number' && cur < dur - 1) {
-                            sendPlayerCommand('seekTo', [dur, true]);
+                    const isMismatchedAdId = Boolean(playingId && expectedId && playingId !== expectedId);
+                    const isShortAdDuration = Boolean(typeof dur === 'number' && dur > 0 && dur <= 180);
+
+                    if (isMismatchedAdId || isShortAdDuration) {
+                        triggerAggressiveAdBypass(expectedId, dur, cur);
+                    } else if (playingId === expectedId && (typeof dur !== 'number' || dur === 0 || dur > 180)) {
+                        if (isAdPlaying) {
+                            setAdShieldState(false);
                         }
-                    } else if (typeof dur === 'number' && dur >= 300) {
-                        sendPlayerCommand('setPlaybackRate', [1]);
                     }
                 }
 
@@ -1200,7 +2337,7 @@
             } catch (e) {}
         });
 
-        async function fetchWithTimeout(url, timeoutMs = 5500) {
+        async function fetchWithTimeout(url, timeoutMs = 3500) {
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), timeoutMs);
             try {
@@ -1214,9 +2351,15 @@
             }
         }
 
-        // HTML പേജിൽ നിന്ന് യഥാർത്ഥ ലൈവ് Video ID മാത്രം വേർതിരിച്ചെടുക്കുന്ന ഫങ്ഷൻ
-        function extractLiveVideoId(html, oldVideoId = "", isDirectChannelPage = false) {
+        function extractLiveVideoId(html, oldVideoId = "", isDirectChannelPage = false, channel = null) {
             if (!html) return null;
+
+            if (channel && channel.excludeMatch) {
+                const pageTitleMatch = html.match(/<title>(.*?)<\/title>/i);
+                if (pageTitleMatch && channel.excludeMatch.test(pageTitleMatch[1])) {
+                    return null;
+                }
+            }
 
             const strictLivePatterns = [
                 /"videoId":"([a-zA-Z0-9_-]{11})"[^}]{0,500}?"isLiveNow":true/g,
@@ -1235,11 +2378,15 @@
                 );
             }
 
+            const otherChannelIds = channels
+                .filter(c => !channel || c.id !== channel.id)
+                .map(c => c.liveVideoId);
+
             for (const regex of strictLivePatterns) {
                 let match;
                 while ((match = regex.exec(html)) !== null) {
                     const id = match[1];
-                    if (id && id !== oldVideoId && !expiredIds.includes(id)) {
+                    if (id && id !== oldVideoId && !expiredIds.includes(id) && !otherChannelIds.includes(id)) {
                         return id;
                     }
                 }
@@ -1248,8 +2395,7 @@
             return null;
         }
 
-        // 1. മൾട്ടിപ്പിൾ പ്രോക്സികൾ വഴി ചാനൽ പേജിൽ നിന്നോ യൂട്യൂബ് ലൈവ് സെർച്ചിൽ നിന്നോ പുതിയ ഐഡി തിരയുന്നു
-        async function fetchFromWebProxies(targetUrl, oldVideoId, isDirectChannelPage = false) {
+        async function fetchFromWebProxies(targetUrl, oldVideoId, isDirectChannelPage = false, channel = null) {
             const cb = `_cb=${Date.now()}`;
             const urlWithCache = targetUrl.includes('?') ? `${targetUrl}&${cb}` : `${targetUrl}?${cb}`;
             const encUrl = encodeURIComponent(urlWithCache);
@@ -1263,7 +2409,7 @@
             ];
 
             const proxyTasks = proxyUrls.map(async (p) => {
-                const res = await fetchWithTimeout(p.url, 5500);
+                const res = await fetchWithTimeout(p.url, 3500);
                 let html = "";
                 if (p.type === 'json') {
                     const data = await res.json();
@@ -1271,7 +2417,7 @@
                 } else {
                     html = await res.text();
                 }
-                const id = extractLiveVideoId(html, oldVideoId, isDirectChannelPage);
+                const id = extractLiveVideoId(html, oldVideoId, isDirectChannelPage, channel);
                 if (id) return id;
                 throw new Error("No valid Live ID found");
             });
@@ -1279,9 +2425,9 @@
             return await Promise.any(proxyTasks);
         }
 
-        // 2. Piped & Invidious Search API വഴി ചാനലിന്റെ പേര് പരിശോധിച്ച് Live Stream കണ്ടുപിടിക്കുന്നു
         async function fetchFromSearchAPIs(channel, oldVideoId) {
             const q = encodeURIComponent(channel.searchQuery || `${channel.name} Malayalam Live`);
+            const otherChannelIds = channels.filter(c => c.id !== channel.id).map(c => c.liveVideoId);
             
             const isValidChannelMatch = (title = "", author = "") => {
                 const combined = `${title} ${author}`;
@@ -1307,13 +2453,13 @@
 
             pipedInstances.forEach(base => {
                 tasks.push((async () => {
-                    const res = await fetchWithTimeout(`${base}/search?q=${q}&filter=livestreams`, 5000);
+                    const res = await fetchWithTimeout(`${base}/search?q=${q}&filter=livestreams`, 3200);
                     const data = await res.json();
                     if (data && Array.isArray(data.items)) {
                         for (const item of data.items) {
                             if (item.url && isValidChannelMatch(item.title, item.uploaderName)) {
                                 const m = item.url.match(/v=([a-zA-Z0-9_-]{11})/);
-                                if (m && m[1] && m[1] !== oldVideoId && !expiredIds.includes(m[1])) {
+                                if (m && m[1] && m[1] !== oldVideoId && !expiredIds.includes(m[1]) && !otherChannelIds.includes(m[1])) {
                                     return m[1];
                                 }
                             }
@@ -1325,13 +2471,14 @@
 
             invidiousInstances.forEach(base => {
                 tasks.push((async () => {
-                    const res = await fetchWithTimeout(`${base}/api/v1/search?q=${q}&type=video&features=live`, 5000);
+                    const res = await fetchWithTimeout(`${base}/api/v1/search?q=${q}&type=video&features=live`, 3200);
                     const data = await res.json();
                     if (Array.isArray(data)) {
                         const valid = data.find(v => 
                             v.videoId && 
                             v.videoId !== oldVideoId && 
                             !expiredIds.includes(v.videoId) && 
+                            !otherChannelIds.includes(v.videoId) &&
                             isValidChannelMatch(v.title, v.author)
                         );
                         if (valid) return valid.videoId;
@@ -1343,13 +2490,12 @@
             return await Promise.any(tasks);
         }
 
-        // 3. YouTube Official RSS Feed + rss2json API
         async function fetchFromYouTubeRSS(channelId, oldVideoId) {
             if (!channelId) throw new Error("No channelId");
             const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
             const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
 
-            const res = await fetchWithTimeout(apiUrl, 4500);
+            const res = await fetchWithTimeout(apiUrl, 3000);
             const data = await res.json();
             if (data && Array.isArray(data.items) && data.items.length > 0) {
                 const liveItem = data.items.find(item => {
@@ -1366,41 +2512,32 @@
             throw new Error("Not found in RSS");
         }
 
-        // 2-ഘട്ടങ്ങളായി ഏറ്റവും കൃത്യമായ പുതിയ ലൈവ് ഐഡി കണ്ടെത്തുന്ന പ്രധാന ഫങ്ഷൻ
         async function findLatestLiveVideoId(channel) {
             const oldId = channel.liveVideoId;
 
-            const stage1Promises = [];
+            const allPromises = [];
             if (channel.handle) {
-                stage1Promises.push(fetchFromWebProxies(`https://www.youtube.com/${channel.handle}/live`, oldId, true));
-                stage1Promises.push(fetchFromWebProxies(`https://www.youtube.com/${channel.handle}/streams`, oldId, false));
+                allPromises.push(fetchFromWebProxies(`https://www.youtube.com/${channel.handle}/live`, oldId, true, channel));
+                allPromises.push(fetchFromWebProxies(`https://www.youtube.com/${channel.handle}/streams`, oldId, false, channel));
             }
             if (channel.altHandle) {
-                stage1Promises.push(fetchFromWebProxies(`https://www.youtube.com/${channel.altHandle}/live`, oldId, true));
-                stage1Promises.push(fetchFromWebProxies(`https://www.youtube.com/${channel.altHandle}/streams`, oldId, false));
+                allPromises.push(fetchFromWebProxies(`https://www.youtube.com/${channel.altHandle}/live`, oldId, true, channel));
             }
             if (channel.channelId) {
-                stage1Promises.push(fetchFromWebProxies(`https://www.youtube.com/channel/${channel.channelId}/live`, oldId, true));
-                stage1Promises.push(fetchFromYouTubeRSS(channel.channelId, oldId));
+                allPromises.push(fetchFromWebProxies(`https://www.youtube.com/channel/${channel.channelId}/live`, oldId, true, channel));
+                allPromises.push(fetchFromYouTubeRSS(channel.channelId, oldId));
+            }
+            allPromises.push(fetchFromSearchAPIs(channel, oldId));
+
+            if (channel.id !== 6) {
+                const queryText = channel.searchQuery || `${channel.name} Malayalam Live`;
+                const ytLiveSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(queryText)}&sp=EgJAAQ%253D%253D`;
+                allPromises.push(fetchFromWebProxies(ytLiveSearchUrl, oldId, false, channel));
             }
 
             try {
-                if (stage1Promises.length > 0) {
-                    const directId = await Promise.any(stage1Promises);
-                    if (directId) return directId;
-                }
-            } catch (e) {}
-
-            const stage2Promises = [];
-            const queryText = channel.searchQuery || `${channel.name} Malayalam Live`;
-            const ytLiveSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(queryText)}&sp=EgJAAQ%253D%253D`;
-            
-            stage2Promises.push(fetchFromSearchAPIs(channel, oldId));
-            stage2Promises.push(fetchFromWebProxies(ytLiveSearchUrl, oldId, false));
-
-            try {
-                const searchId = await Promise.any(stage2Promises);
-                if (searchId) return searchId;
+                const fastestId = await Promise.any(allPromises);
+                if (fastestId) return fastestId;
             } catch (e) {}
 
             return null;
@@ -1423,19 +2560,33 @@
             const unmuteToast = document.getElementById('center-unmute-toast');
             const toastText = document.getElementById('toast-text');
             if (unmuteToast && toastText) {
-                toastText.innerText = "പുതിയ ലൈവ് തിരയുന്നു...";
+                toastText.innerText = "പുതിയ 1080p ലൈവ് തിരയുന്നു...";
                 unmuteToast.style.display = 'flex';
             }
 
             const currentChannel = channels[currentIndex];
             const previousVideoId = currentChannel.liveVideoId;
 
+            delete bestChannelHlsUrl[currentChannel.id];
+            saveBestHlsCache();
+            clearAllPreloads();
+            await loadGitHubActionStreams();
+
+            if (currentChannel.streamKey && githubStreams[currentChannel.streamKey]) {
+                const ghEntry = githubStreams[currentChannel.streamKey];
+                const ghUrl = typeof ghEntry === 'string' ? ghEntry : (ghEntry && ghEntry.url ? ghEntry.url : null);
+                if (ghUrl) delete failedOfficialHls[ghUrl];
+            }
+            if (currentChannel.hlsUrls) {
+                currentChannel.hlsUrls.forEach(u => delete failedOfficialHls[u]);
+            }
+
             try {
                 let newVideoId = null;
 
                 if (currentChannel.id === 8) {
                     try {
-                        const response = await fetchWithTimeout(`https://news18-live-fetcher.shamsushaz14.workers.dev?t=${Date.now()}`, 4000);
+                        const response = await fetchWithTimeout(`https://news18-live-fetcher.shamsushaz14.workers.dev?t=${Date.now()}`, 2200);
                         const data = await response.json();
                         if (data.videoId && data.videoId !== previousVideoId && !expiredIds.includes(data.videoId)) {
                             newVideoId = data.videoId;
@@ -1455,10 +2606,10 @@
                 }
             } catch (err) {} finally {
                 autoRecoverInProgress = false;
-                playChannel(currentIndex, false);
+                playChannel(currentIndex, true);
                 setTimeout(() => {
                     refreshIcon.classList.remove('spin-icon');
-                }, 600);
+                }, 400);
             }
         }
 
@@ -1472,6 +2623,10 @@
             }
 
             if (playerBox && playerBox.style.display === "block") {
+                stopHlsPlayer();
+                clearAllPreloads();
+                stopYouTubeApiPolling();
+                setAdShieldState(false);
                 sendPlayerCommand('stopVideo');
                 iframe.src = "";
                 playerReady = false;
@@ -1511,6 +2666,7 @@
             const muteSvgIcon = document.getElementById('mute-svg-icon');
             const unmuteToast = document.getElementById('center-unmute-toast');
             const toastText = document.getElementById('toast-text');
+            const videoEl = getActiveMainVideoEl();
 
             if (toastText) toastText.innerText = "Tap to Unmute";
             muteSvgIcon.innerHTML = isMuted ? svgMuted : svgUnmuted;
@@ -1536,7 +2692,11 @@
                 unmuteToast.style.display = 'flex';
             }
 
-            sendPlayerCommand(isMuted ? 'mute' : 'unMute');
+            if (usingHls && videoEl) {
+                videoEl.muted = isMuted;
+            } else if (!isAdPlaying) {
+                sendPlayerCommand(isMuted ? 'mute' : 'unMute');
+            }
         }
 
         function toggleStretchRatio() {
@@ -1567,7 +2727,7 @@
             if (currentIndex === -1) playChannel(0);
 
             isStretchMode = false;
-            playerBox.classList.remove('ratio-stretch');
+            playerBox.classList.remove('ratio-stretch', 'fs-exiting');
             
             const stretchBtn = document.getElementById('side-stretch-btn');
             if(stretchBtn) {
@@ -1576,6 +2736,7 @@
             }
 
             playerBox.classList.add('fullscreen-mode');
+            showFsChannels();
 
             try {
                 const elem = document.documentElement;
@@ -1593,9 +2754,15 @@
 
         function exitFullScreen() {
             const playerBox = document.getElementById('player-box');
+            const fsList = document.getElementById('fs-channel-list');
             if (playerBox) {
-                playerBox.classList.remove('fullscreen-mode');
-                playerBox.classList.remove('ratio-stretch');
+                clearTimeout(fsChannelTimer);
+                if (fsList) fsList.classList.remove('show');
+                playerBox.classList.remove('fullscreen-mode', 'ratio-stretch');
+                playerBox.classList.add('fs-exiting');
+                setTimeout(() => {
+                    playerBox.classList.remove('fs-exiting');
+                }, 220);
                 isStretchMode = false;
                 
                 const stretchBtn = document.getElementById('side-stretch-btn');
@@ -1624,13 +2791,12 @@
         let touchStartY = 0;
         let touchEndX = 0;
         let touchEndY = 0;
-        const swipeThreshold = 50; 
+        const swipeThreshold = 40; 
 
         function handleGesture() {
             const diffX = touchEndX - touchStartX;
             const diffY = touchEndY - touchStartY;
 
-            // സ്ക്രീനിൽ ടാപ്പ് ചെയ്താൽ
             if (Math.abs(diffX) < 10 && Math.abs(diffY) < 10) {
                 const playerBox = document.getElementById('player-box');
                 
@@ -1657,15 +2823,22 @@
             }
         }
 
-        window.onload = function() {
+        // Zero Startup Lag: DOM റെഡിയായ ഉടൻ തന്നെ ആദ്യ ചാനൽ പ്ലേ ചെയ്യുന്നു
+        let appInitialized = false;
+        function initApp() {
+            if (appInitialized) return;
+            appInitialized = true;
+
             document.getElementById('mute-svg-icon').innerHTML = svgMuted;
             
+            playChannel(0, true);
+            loadGitHubActionStreams();
+
             renderClockContent();
             setInterval(toggleClockBlink, 3000);
 
             buildGrid();
             buildFsChannelList();
-            playChannel(0, true);
 
             const swipeOverlay = document.getElementById('swipe-overlay');
             if (swipeOverlay) {
@@ -1680,7 +2853,13 @@
                     handleGesture();
                 }, { passive: true });
             }
-        };
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initApp);
+        } else {
+            initApp();
+        }
     </script>
 </body>
 </html>
